@@ -1,0 +1,67 @@
+@font-face {
+  font-family: "SourceCodePro";
+  src: url("/fonts/SourceCodePro-Medium.ttf");
+  font-size: normal;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  overflow: hidden;
+}
+
+#canvas {
+  appearance: none;
+  user-select: none;
+  outline: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+
+#instruction-banner {
+  z-index: 10;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  padding: 0.75rem;
+  text-align: center;
+  color: #fff;
+  font-family: "SourceCodePro", system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
+    sans-serif;
+  font-size: 1rem;
+
+  transition: opacity 1s ease-in-out;
+}
+
+.lil-gui {
+  --width: min(95%, 400px);
+  right: 0.5rem !important;
+}
+
+.spinner {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  box-sizing: border-box;
+  border-top: 4px solid #fff;
+  border-left: 4px solid #fff;
+  border-right: 4px solid #ff00;
+  animation: spin 0.7s infinite linear;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
