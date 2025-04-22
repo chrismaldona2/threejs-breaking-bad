@@ -7,12 +7,13 @@ import Timer from "./utils/Timer";
 import Debug from "./utils/Debug";
 import Resources from "./utils/Resources";
 import World from "./world/World";
+import Canvas from "./utils/Canvas";
 
 class Experience {
   private static instance: Experience;
   debug!: Debug;
   sizes!: Sizes;
-  canvas!: HTMLCanvasElement;
+  canvas!: Canvas;
   resources!: Resources;
   scene!: THREE.Scene;
   timer!: Timer;
@@ -21,14 +22,14 @@ class Experience {
   fullscreenHandler!: FullscreenHandler;
   world!: World;
 
-  constructor(canvas: HTMLCanvasElement) {
+  constructor() {
     if (Experience.instance) {
       return Experience.instance;
     }
     Experience.instance = this;
 
-    this.canvas = canvas;
-    this.fullscreenHandler = new FullscreenHandler(this.canvas);
+    this.canvas = new Canvas();
+    this.fullscreenHandler = new FullscreenHandler(this.canvas.domElement);
     this.debug = new Debug();
     this.sizes = new Sizes();
     this.scene = new THREE.Scene();
@@ -53,16 +54,15 @@ class Experience {
   }
 
   destroy() {
-    this.sizes.dispose();
     this.timer.off("tick");
-    this.resources.dispose();
+    this.resources.off("loaded");
+    this.sizes.dispose();
     this.fullscreenHandler.dispose();
 
     //  GEOMETRIES AND MATERIALS DISPOSE
     this.scene.traverse((child) => {
       if (child instanceof THREE.Mesh) {
         child.geometry.dispose();
-
         for (const key in child.material) {
           const value = child.material[key];
           if (value && typeof value.dispose === "function") {
@@ -71,12 +71,12 @@ class Experience {
         }
       }
     });
-
     this.camera.orbitControls.dispose();
     this.renderer.instance.dispose();
     if (this.debug.gui) {
       this.debug.dispose();
     }
+    this.canvas.destroy();
   }
 
   static getInstance(): Experience {

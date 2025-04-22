@@ -12,7 +12,7 @@ class Renderer {
 
     this.sizes = this.experience.sizes;
     this.instance = new THREE.WebGLRenderer({
-      canvas: this.experience.canvas,
+      canvas: this.experience.canvas.domElement,
       antialias: true,
     });
     this.instance.setSize(this.sizes.width, this.sizes.height);

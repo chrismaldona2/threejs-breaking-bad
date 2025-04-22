@@ -57,10 +57,6 @@ class Resources extends EventEmitter {
   getAsset<T extends SupportedFiles>(name: string): T | undefined {
     return this.items[name] as T;
   }
-
-  dispose() {
-    this.off("loaded");
-  }
 }
 
 export default Resources;

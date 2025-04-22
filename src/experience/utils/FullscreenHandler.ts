@@ -1,8 +1,8 @@
 // @ts-nocheck
 class FullscreenHandler {
   canvas: HTMLCanvasElement;
-  handleDblClick: () => void;
-  handleKeydown: (event: KeyboardEvent) => void;
+  private handleDblClick: () => void;
+  private handleKeydown: (event: KeyboardEvent) => void;
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;

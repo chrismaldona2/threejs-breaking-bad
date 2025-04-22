@@ -21,7 +21,10 @@ class Camera {
     this.instance.position.set(1, 1, 1);
 
     // ORBIT CONTROLS
-    this.orbitControls = new OrbitControls(this.instance, experience.canvas);
+    this.orbitControls = new OrbitControls(
+      this.instance,
+      experience.canvas.domElement
+    );
     this.orbitControls.enableDamping = true;
   }
 
