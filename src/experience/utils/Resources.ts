@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import sources, { Source } from "../data/sources";
 import EventEmitter from "./EventEmitter";
-import { GLTF, GLTFLoader } from "three/examples/jsm/Addons.js";
+import { DRACOLoader, GLTF, GLTFLoader } from "three/examples/jsm/Addons.js";
 
 type SupportedLoaders = GLTFLoader | THREE.TextureLoader;
 type SupportedFiles = GLTF | THREE.Texture;
@@ -25,7 +25,10 @@ class Resources extends EventEmitter {
   }
 
   private initializeLoaders(): typeof this.loaders {
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath("./draco/");
     const gltfLoader = new GLTFLoader();
+    gltfLoader.setDRACOLoader(dracoLoader);
     const textureLoader = new THREE.TextureLoader();
     return { gltf: gltfLoader, texture: textureLoader };
   }

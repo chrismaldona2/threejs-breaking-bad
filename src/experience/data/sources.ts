@@ -6,6 +6,17 @@ export type Source = {
   path: string;
 };
 
-const sources: Source[] = [];
+const sources: Source[] = [
+  {
+    name: "labModel",
+    type: "gltf",
+    path: "./scene.glb",
+  },
+  {
+    name: "labBakedTexture",
+    type: "texture",
+    path: "./baked.jpg",
+  },
+];
 
 export default sources;
