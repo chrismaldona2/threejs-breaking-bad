@@ -3,12 +3,22 @@ import Lab from "./Lab";
 
 class World {
   private readonly experience: Experience;
+  lab?: Lab;
+
   constructor() {
     this.experience = Experience.getInstance();
 
     this.experience.resources.on("loaded", () => {
-      new Lab();
+      this.lab = new Lab();
     });
+  }
+
+  update() {
+    this.lab?.update();
+  }
+
+  destroy() {
+    this.lab?.destroy();
   }
 }
 

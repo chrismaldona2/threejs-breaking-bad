@@ -32,6 +32,25 @@ class Lab {
       this.experience.scene.add(this.model);
     }
   }
+
+  update() {}
+
+  destroy() {
+    if (!this.model) return;
+
+    this.model.traverse((child) => {
+      if (child instanceof THREE.Mesh) {
+        child.geometry.dispose();
+
+        for (const key in child.material) {
+          const value = child.material[key];
+          if (value && typeof value.dispose === "function") {
+            value.dispose();
+          }
+        }
+      }
+    });
+  }
 }
 
 export default Lab;
