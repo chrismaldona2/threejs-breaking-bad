@@ -14,12 +14,12 @@ class Experience {
   debug!: Debug;
   sizes!: Sizes;
   canvas!: Canvas;
+  fullscreenHandler!: FullscreenHandler;
   resources!: Resources;
   scene!: THREE.Scene;
   timer!: Timer;
   camera!: Camera;
   renderer!: Renderer;
-  fullscreenHandler!: FullscreenHandler;
   world!: World;
 
   constructor() {
