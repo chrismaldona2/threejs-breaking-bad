@@ -10,12 +10,12 @@ const sources: Source[] = [
   {
     name: "labModel",
     type: "gltf",
-    path: "./scene.glb",
+    path: "./glass_test.glb",
   },
   {
     name: "labBakedTexture",
     type: "texture",
-    path: "./baked.jpg",
+    path: "./glass_test.png",
   },
 ];
 

@@ -18,13 +18,14 @@ class Camera {
       0.1,
       100
     );
-    this.instance.position.set(1, 1, 1);
+    this.instance.position.set(0.25, 0.5, 0.25);
 
     // ORBIT CONTROLS
     this.orbitControls = new OrbitControls(
       this.instance,
       experience.canvas.domElement
     );
+    this.orbitControls.target.set(-0.05, 0.05, -0.25);
     this.orbitControls.enableDamping = true;
   }
 

@@ -23,12 +23,24 @@ class Lab {
         map: texture,
       });
       this.model = gltf.scene;
+      this.model.scale.setScalar(0.05);
       this.model.traverse((child) => {
-        if (child instanceof THREE.Mesh) {
+        if (child instanceof THREE.Mesh && child.name !== "glass") {
           child.material = this.material;
         }
-      });
 
+        if (child instanceof THREE.Mesh && child.name === "glass") {
+          child.material = new THREE.MeshPhysicalMaterial({
+            clearcoat: 0.8,
+            ior: 1.15,
+            specularIntensity: 0.6,
+            roughness: 0.0,
+            thickness: 0.5,
+            transmission: 0.5,
+            sheen: 0.0,
+          });
+        }
+      });
       this.experience.scene.add(this.model);
     }
   }
