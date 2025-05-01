@@ -8,14 +8,24 @@ export type Source = {
 
 const sources: Source[] = [
   {
-    name: "labModel",
+    name: "sceneModel",
     type: "gltf",
-    path: "./glass_test.glb",
+    path: "./scene.glb",
   },
   {
-    name: "labBakedTexture",
+    name: "sceneBakedTexture",
     type: "texture",
-    path: "./glass_test.png",
+    path: "./scene_bake.jpg",
+  },
+  {
+    name: "postersModel",
+    type: "gltf",
+    path: "./posters.glb",
+  },
+  {
+    name: "postersBakedTexture",
+    type: "texture",
+    path: "./posters_bake.jpg",
   },
 ];
 

@@ -15,7 +15,7 @@ class Renderer {
       canvas: this.experience.canvas.domElement,
       antialias: true,
     });
-    this.instance.setClearColor(0xffffff);
+    this.instance.setClearColor(0x0a0b0e);
     this.instance.setSize(this.sizes.width, this.sizes.height);
     this.instance.setPixelRatio(this.sizes.pixelRatio);
   }

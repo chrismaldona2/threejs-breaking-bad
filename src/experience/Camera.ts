@@ -15,18 +15,27 @@ class Camera {
     this.instance = new THREE.PerspectiveCamera(
       45,
       this.sizes.width / this.sizes.height,
-      0.1,
+      0.01,
       100
     );
-    this.instance.position.set(0.25, 0.5, 0.25);
+    this.instance.position.set(0.5, 0.54, 0.73);
 
     // ORBIT CONTROLS
     this.orbitControls = new OrbitControls(
       this.instance,
       experience.canvas.domElement
     );
-    this.orbitControls.target.set(-0.05, 0.05, -0.25);
+    this.orbitControls.target.set(-0.05, 0, 0);
     this.orbitControls.enableDamping = true;
+    this.orbitControls.dampingFactor = 0.08;
+    this.orbitControls.maxPolarAngle = Math.PI / 2.1;
+
+    this.orbitControls.minAzimuthAngle = -Math.PI / 12;
+    this.orbitControls.maxAzimuthAngle = Math.PI / 2;
+
+    this.orbitControls.addEventListener("change", () =>
+      console.log(this.instance.position)
+    );
   }
 
   resize() {
