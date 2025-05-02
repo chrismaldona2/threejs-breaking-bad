@@ -7,7 +7,12 @@ class Environment {
   constructor() {
     this.experience = Experience.getInstance();
 
-    this.experience.scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
+
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.85);
+    directionalLight.position.set(-0.25, 0.5, 0.05);
+
+    this.experience.scene.add(ambientLight, directionalLight);
   }
 }
 

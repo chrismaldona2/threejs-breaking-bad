@@ -9,6 +9,10 @@ body {
   overflow: hidden;
 }
 
+body {
+  background-color: #100e1d;
+}
+
 .lil-gui {
   --width: min(95%, 400px);
   right: 0.5rem !important;

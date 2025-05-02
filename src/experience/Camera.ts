@@ -27,15 +27,12 @@ class Camera {
     );
     this.orbitControls.target.set(-0.05, 0, 0);
     this.orbitControls.enableDamping = true;
-    this.orbitControls.dampingFactor = 0.08;
+    this.orbitControls.dampingFactor = 0.05;
+    this.orbitControls.panSpeed = 0.5;
+    this.orbitControls.minDistance = 0.1;
     this.orbitControls.maxPolarAngle = Math.PI / 2.1;
-
-    this.orbitControls.minAzimuthAngle = -Math.PI / 12;
-    this.orbitControls.maxAzimuthAngle = Math.PI / 2;
-
-    this.orbitControls.addEventListener("change", () =>
-      console.log(this.instance.position)
-    );
+    this.orbitControls.maxDistance = 1;
+    this.orbitControls.zoomSpeed = 0.5;
   }
 
   resize() {
