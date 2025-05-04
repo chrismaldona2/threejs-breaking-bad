@@ -5,8 +5,7 @@ class Debug {
   private keydownHandler: (event: KeyboardEvent) => void;
 
   constructor() {
-    this.gui = new GUI({ title: "Tweaks" });
-    this.gui.hide();
+    this.gui = new GUI({ title: "Tweaks", closeFolders: true });
 
     this.keydownHandler = (event: KeyboardEvent) => {
       if (event.key.toLowerCase() === "h") this.toggle();

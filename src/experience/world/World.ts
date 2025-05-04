@@ -1,10 +1,12 @@
 import Experience from "../Experience";
 import Lab from "./Lab";
 import Environment from "./Environment";
+import Smoke from "./Smoke";
 
 class World {
   private readonly experience: Experience;
   lab?: Lab;
+  coffeeSmoke?: Smoke;
   environment: Environment;
 
   constructor() {
@@ -13,11 +15,13 @@ class World {
     this.environment = new Environment();
     this.experience.resources.on("loaded", () => {
       this.lab = new Lab();
+      this.coffeeSmoke = new Smoke();
     });
   }
 
   update() {
     this.lab?.update();
+    this.coffeeSmoke?.update();
   }
 
   destroy() {

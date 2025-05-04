@@ -8,34 +8,34 @@ export type Source = {
 
 const sources: Source[] = [
   {
-    name: "lab_p1",
+    name: "lab_model",
     type: "gltf",
-    path: "./lab_p1.glb",
+    path: "./models/lab.glb",
   },
   {
-    name: "lab_p1_texture",
-    type: "texture",
-    path: "./lab_p1.webp",
-  },
-  {
-    name: "lab_p2",
+    name: "glass_model",
     type: "gltf",
-    path: "./lab_p2.glb",
+    path: "./models/glass.glb",
   },
   {
-    name: "lab_p2_texture",
+    name: "lab_texture_p1",
     type: "texture",
-    path: "./lab_p2.webp",
+    path: "./textures/compressed/lab_p1.webp",
   },
   {
-    name: "lab_p3",
-    type: "gltf",
-    path: "./lab_p3.glb",
-  },
-  {
-    name: "lab_p3_texture",
+    name: "lab_texture_p2",
     type: "texture",
-    path: "./lab_p3.webp",
+    path: "./textures/compressed/lab_p2.webp",
+  },
+  {
+    name: "lab_texture_p3",
+    type: "texture",
+    path: "./textures/compressed/lab_p3.webp",
+  },
+  {
+    name: "smoke_texture",
+    type: "texture",
+    path: "./textures/perlin/smoke.png",
   },
 ];
 

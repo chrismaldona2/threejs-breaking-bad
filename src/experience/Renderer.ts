@@ -6,6 +6,7 @@ class Renderer {
   experience: Experience;
   instance: THREE.WebGLRenderer;
   sizes: Sizes;
+  clearColor: string = "#100e1d";
 
   constructor() {
     this.experience = Experience.getInstance();
@@ -15,9 +16,18 @@ class Renderer {
       canvas: this.experience.canvas.domElement,
       antialias: true,
     });
-    this.instance.setClearColor(0x100e1d);
+    this.instance.setClearColor(this.clearColor);
     this.instance.setSize(this.sizes.width, this.sizes.height);
     this.instance.setPixelRatio(this.sizes.pixelRatio);
+
+    this.setTweaks();
+  }
+
+  setTweaks() {
+    const debug = this.experience.debug.gui.addFolder("Renderer");
+    debug.addColor(this, "clearColor").onChange(() => {
+      this.instance.setClearColor(this.clearColor);
+    });
   }
 
   resize() {

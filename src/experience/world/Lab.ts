@@ -1,146 +1,110 @@
+import * as THREE from "three";
 import { GLTF } from "three/examples/jsm/Addons.js";
 import Experience from "../Experience";
-import * as THREE from "three";
+import acidVertexShader from "../../shaders/acid/vertex.glsl";
+import acidFragmentShader from "../../shaders/acid/fragment.glsl";
+import GUI from "lil-gui";
 
 class Lab {
   private readonly experience: Experience;
-  lab: THREE.Group;
+  group: THREE.Group;
+  lab?: THREE.Object3D;
+  textures?: {
+    lab_texture_p1: THREE.Texture;
+    lab_texture_p2: THREE.Texture;
+    lab_texture_p3: THREE.Texture;
+  };
+  tweaks?: GUI;
+  acid?: {
+    mesh: THREE.Mesh;
+    material: THREE.ShaderMaterial;
+    outsideColor: string;
+    insideColor: string;
+  };
 
   constructor() {
     this.experience = Experience.getInstance();
-    this.lab = new THREE.Group();
-    this.getPart1();
-    this.getPart2();
-    this.getPart3();
 
-    this.lab.scale.setScalar(0.025);
-    this.experience.scene.add(this.lab);
+    this.group = new THREE.Group();
+    this.init();
+    this.group.scale.setScalar(0.025);
+    this.experience.scene.add(this.group);
+
+    this.setupTweaks();
   }
 
-  getPart1() {
-    const lab_p1 = this.experience.resources.getAsset<GLTF>("lab_p1");
-    const lab_p1_texture =
-      this.experience.resources.getAsset<THREE.Texture>("lab_p1_texture");
-
-    if (!lab_p1 || !lab_p1_texture) return;
-
-    lab_p1_texture.flipY = false;
-    lab_p1_texture.colorSpace = THREE.SRGBColorSpace;
-    lab_p1_texture.magFilter = THREE.LinearFilter;
-
-    const material = new THREE.MeshBasicMaterial({
-      map: lab_p1_texture,
-    });
-
-    const model = lab_p1.scene.children[0];
-    if (model instanceof THREE.Mesh) {
-      model.material = material;
-    }
-    this.lab.add(model);
+  private init() {
+    this.setupTextures();
+    this.setupLab();
+    this.setupGlass();
+    this.setupLabMaterials();
+    this.setupEmissive();
+    this.setupRadio();
+    this.setupAcid();
   }
 
-  getPart2() {
-    const lab_p2 = this.experience.resources.getAsset<GLTF>("lab_p2");
-    const lab_p2_texture =
-      this.experience.resources.getAsset<THREE.Texture>("lab_p2_texture");
-
-    if (!lab_p2 || !lab_p2_texture) return;
-
-    lab_p2_texture.flipY = false;
-    lab_p2_texture.colorSpace = THREE.SRGBColorSpace;
-    lab_p2_texture.magFilter = THREE.LinearFilter;
-
-    const material = new THREE.MeshBasicMaterial({
-      map: lab_p2_texture,
-    });
-
-    const model = lab_p2.scene.children[0];
-    if (model instanceof THREE.Mesh) {
-      model.material = material;
-    }
-    this.lab.add(model);
+  private setupLab() {
+    const labModelFile = this.experience.resources.getAsset<GLTF>("lab_model");
+    if (!labModelFile) return null;
+    this.lab = labModelFile.scene;
+    this.group.add(this.lab);
   }
 
-  getPart3() {
-    const lab_p3 = this.experience.resources.getAsset<GLTF>("lab_p3");
-    const lab_p3_texture =
-      this.experience.resources.getAsset<THREE.Texture>("lab_p3_texture");
+  private setupTextures() {
+    const lab_texture_p1 =
+      this.experience.resources.getAsset<THREE.Texture>("lab_texture_p1");
+    const lab_texture_p2 =
+      this.experience.resources.getAsset<THREE.Texture>("lab_texture_p2");
+    const lab_texture_p3 =
+      this.experience.resources.getAsset<THREE.Texture>("lab_texture_p3");
 
-    if (!lab_p3 || !lab_p3_texture) return;
+    if (!lab_texture_p1 || !lab_texture_p2 || !lab_texture_p3) return;
 
-    lab_p3_texture.flipY = false;
-    lab_p3_texture.colorSpace = THREE.SRGBColorSpace;
-    lab_p3_texture.magFilter = THREE.LinearFilter;
+    lab_texture_p1.flipY = false;
+    lab_texture_p1.colorSpace = THREE.SRGBColorSpace;
+    lab_texture_p2.flipY = false;
+    lab_texture_p2.colorSpace = THREE.SRGBColorSpace;
+    lab_texture_p3.flipY = false;
+    lab_texture_p3.colorSpace = THREE.SRGBColorSpace;
 
-    const model = lab_p3.scene;
+    this.textures = {
+      lab_texture_p1,
+      lab_texture_p2,
+      lab_texture_p3,
+    };
+  }
 
-    /* BAKED MERGED MESH */
-    const textureMaterial = new THREE.MeshBasicMaterial({
-      map: lab_p3_texture,
+  private setupLabMaterials() {
+    if (!this.lab || !this.textures) return;
+    this.lab.getObjectByName;
+
+    const p1_objects = this.lab.getObjectByName("part1") as THREE.Mesh;
+    const p2_objects = this.lab.getObjectByName("part2") as THREE.Mesh;
+    const p3_objects = this.lab.getObjectByName("part3") as THREE.Mesh;
+
+    if (!p1_objects || !p2_objects || !p3_objects) return;
+
+    p1_objects.material = new THREE.MeshBasicMaterial({
+      map: this.textures.lab_texture_p1,
     });
-
-    const bakedMesh = model.children.find(
-      (child) => child.name === "part3"
-    ) as THREE.Mesh;
-    bakedMesh.material = textureMaterial;
-
-    /* RADIO */
-    const radio = model.children.find(
-      (child) => child.name === "radio"
-    ) as THREE.Mesh;
-    radio.material = textureMaterial;
-
-    /* EMISSION MESHES */
-    // RED LIGHTS
-    const redLights = model.children.find(
-      (child) => child.name === "red_lights"
-    ) as THREE.Mesh;
-    redLights.material = new THREE.MeshBasicMaterial({ color: 0xbe0014 });
-
-    // GREEN LIGHTS
-    const greenLights = model.children.find(
-      (child) => child.name === "green_lights"
-    ) as THREE.Mesh;
-    greenLights.material = new THREE.MeshBasicMaterial({ color: 0x68d500 });
-
-    // BLACK LIGHTS
-    const blackLights = model.children.find(
-      (child) => child.name === "black_lights"
-    ) as THREE.Mesh;
-    blackLights.material = new THREE.MeshBasicMaterial({ color: 0x000000 });
-
-    // WHITE LIGHTS
-    const whiteLights = model.children.find(
-      (child) => child.name === "white_lights"
-    ) as THREE.Mesh;
-    whiteLights.material = new THREE.MeshBasicMaterial({ color: 0xffffff });
-
-    // CABINET LIGHTS
-    const cabinetLights = model.children.find(
-      (child) => child.name === "cabinet_light"
-    ) as THREE.Mesh;
-    cabinetLights.material = new THREE.MeshBasicMaterial({
-      color: 0xfdfce3,
+    p2_objects.material = new THREE.MeshBasicMaterial({
+      map: this.textures.lab_texture_p2,
     });
-
-    // BIG RED LIGHT
-    const bigRedLight = model.children.find(
-      (child) => child.name === "big_red_light"
-    ) as THREE.Mesh;
-    bigRedLight.material = new THREE.MeshBasicMaterial({
-      color: 0xb7000b,
+    p3_objects.material = new THREE.MeshBasicMaterial({
+      map: this.textures.lab_texture_p3,
     });
+  }
 
-    // ACID
-    const acid = model.children.find(
-      (child) => child.name === "acid"
-    ) as THREE.Mesh;
-    acid.material = new THREE.MeshBasicMaterial({ color: 0xb3ff6f });
+  private setupGlass() {
+    if (!this.lab) return;
 
-    /* GLASS */
-    const glass = model.children.find(
-      (child) => child.name === "glass"
-    ) as THREE.Mesh;
+    const glassModelFile =
+      this.experience.resources.getAsset<GLTF>("glass_model");
+    if (!glassModelFile) return;
+
+    const glass = glassModelFile.scene.getObjectByName("glass") as THREE.Mesh;
+    if (!glass) return;
+
     glass.material = new THREE.MeshPhysicalMaterial({
       clearcoat: 0.5,
       ior: 1.25,
@@ -151,10 +115,150 @@ class Lab {
       iridescence: 0.75,
     });
 
-    this.lab.add(model);
+    this.group.add(glass);
   }
 
-  update() {}
+  private setupRadio() {
+    if (!this.lab || !this.textures) return;
+
+    const radio = this.lab.getObjectByName("radio") as THREE.Mesh;
+    if (!radio) return;
+    radio.material = new THREE.MeshBasicMaterial({
+      map: this.textures.lab_texture_p3,
+    });
+  }
+
+  private setupEmissive() {
+    if (!this.lab) return;
+
+    const redLights = this.lab.getObjectByName("red_lights") as THREE.Mesh;
+    const greenLights = this.lab.getObjectByName("green_lights") as THREE.Mesh;
+    const blackLights = this.lab.getObjectByName("black_lights") as THREE.Mesh;
+    const whiteLights = this.lab.getObjectByName("white_lights") as THREE.Mesh;
+    const cabinetLights = this.lab.getObjectByName(
+      "cabinet_light"
+    ) as THREE.Mesh;
+    const bigRedLight = this.lab.getObjectByName("big_red_light") as THREE.Mesh;
+
+    if (
+      !redLights ||
+      !greenLights ||
+      !blackLights ||
+      !whiteLights ||
+      !cabinetLights ||
+      !bigRedLight
+    )
+      return;
+
+    redLights.material = new THREE.MeshBasicMaterial({ color: 0xbe0014 });
+    greenLights.material = new THREE.MeshBasicMaterial({ color: 0x68d500 });
+    blackLights.material = new THREE.MeshBasicMaterial({ color: 0x000000 });
+    whiteLights.material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    cabinetLights.material = new THREE.MeshBasicMaterial({
+      color: 0xfdfce3,
+    });
+    bigRedLight.material = new THREE.MeshBasicMaterial({
+      color: 0xb7000b,
+    });
+  }
+
+  private setupAcid() {
+    if (!this.lab) return;
+
+    const acid = this.lab.getObjectByName("acid") as THREE.Mesh;
+    if (!acid) return;
+    acid.scale.setScalar(1.4);
+
+    const acidMaterial = new THREE.ShaderMaterial({
+      vertexShader: acidVertexShader,
+      fragmentShader: acidFragmentShader,
+      uniforms: {
+        uTime: new THREE.Uniform(0),
+        uAnimationSpeed: new THREE.Uniform(0.15),
+        uFrequency: new THREE.Uniform(2.5),
+        uOutsideColor: new THREE.Uniform(new THREE.Color("#d6ffb3")),
+        uInsideColor: new THREE.Uniform(new THREE.Color("#befb88")),
+        uOuterGlowScale: new THREE.Uniform(1.5),
+        uOuterGlowOffset: new THREE.Uniform(-0.485),
+        uStepThreshold: new THREE.Uniform(-0.005),
+        uStepStrength: new THREE.Uniform(0.37),
+      },
+    });
+
+    acid.material = acidMaterial;
+
+    this.acid = {
+      mesh: acid,
+      material: acidMaterial,
+      outsideColor: "#d6ffb3",
+      insideColor: "#befb88",
+    };
+  }
+
+  setupTweaks() {
+    this.tweaks = this.experience.debug.gui.addFolder("Lab");
+    if (this.acid) {
+      const acidTweaks = this.tweaks.addFolder("Acid");
+      acidTweaks
+        .add(this.acid.material.uniforms.uAnimationSpeed, "value")
+        .min(0)
+        .max(2)
+        .step(0.01)
+        .name("animationSpeed");
+      acidTweaks
+        .add(this.acid.material.uniforms.uFrequency, "value")
+        .min(0)
+        .max(8)
+        .step(0.1)
+        .name("frequency");
+
+      acidTweaks
+        .add(this.acid.material.uniforms.uOuterGlowScale, "value")
+        .min(0)
+        .max(4)
+        .step(0.01)
+        .name("glowScale");
+
+      acidTweaks
+        .add(this.acid.material.uniforms.uOuterGlowOffset, "value")
+        .min(-1)
+        .max(1)
+        .step(0.001)
+        .name("glowOffset");
+
+      acidTweaks
+        .add(this.acid.material.uniforms.uStepThreshold, "value")
+        .min(-0.5)
+        .max(0.5)
+        .step(0.001)
+        .name("stepThreshold");
+
+      acidTweaks
+        .add(this.acid.material.uniforms.uStepStrength, "value")
+        .min(0)
+        .max(2)
+        .step(0.001)
+        .name("stepStrength");
+
+      acidTweaks.addColor(this.acid, "outsideColor").onChange(() => {
+        this.acid?.material.uniforms.uOutsideColor.value.set(
+          this.acid.outsideColor
+        );
+      });
+      acidTweaks.addColor(this.acid, "insideColor").onChange(() => {
+        this.acid?.material.uniforms.uInsideColor.value.set(
+          this.acid.insideColor
+        );
+      });
+    }
+  }
+
+  update() {
+    if (this.acid) {
+      this.acid.material.uniforms.uTime.value =
+        this.experience.timer.elapsedTime;
+    }
+  }
 
   destroy() {}
 }
