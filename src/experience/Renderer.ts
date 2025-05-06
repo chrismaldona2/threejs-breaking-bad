@@ -19,15 +19,6 @@ class Renderer {
     this.instance.setClearColor(this.clearColor);
     this.instance.setSize(this.sizes.width, this.sizes.height);
     this.instance.setPixelRatio(this.sizes.pixelRatio);
-
-    this.setTweaks();
-  }
-
-  setTweaks() {
-    const debug = this.experience.debug.gui.addFolder("Renderer");
-    debug.addColor(this, "clearColor").onChange(() => {
-      this.instance.setClearColor(this.clearColor);
-    });
   }
 
   resize() {

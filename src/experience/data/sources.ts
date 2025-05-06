@@ -1,9 +1,9 @@
-type SupportedTypes = "gltf" | "texture";
+type SupportedTypes = "gltf" | "texture" | "cubeTexture";
 
 export type Source = {
   name: string;
   type: SupportedTypes;
-  path: string;
+  path: string | string[];
 };
 
 const sources: Source[] = [
@@ -33,9 +33,21 @@ const sources: Source[] = [
     path: "./textures/compressed/lab_p3.webp",
   },
   {
-    name: "smoke_texture",
+    name: "steam_texture",
     type: "texture",
-    path: "./textures/perlin/smoke.png",
+    path: "./textures/perlin/steam.webp",
+  },
+  {
+    name: "env_map",
+    type: "cubeTexture",
+    path: [
+      "./textures/envmap/px.webp",
+      "./textures/envmap/nx.webp",
+      "./textures/envmap/py.webp",
+      "./textures/envmap/ny.webp",
+      "./textures/envmap/pz.webp",
+      "./textures/envmap/nz.webp",
+    ],
   },
 ];
 

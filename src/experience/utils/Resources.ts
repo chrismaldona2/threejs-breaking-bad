@@ -3,15 +3,18 @@ import sources, { Source } from "../data/sources";
 import EventEmitter from "./EventEmitter";
 import { DRACOLoader, GLTF, GLTFLoader } from "three/examples/jsm/Addons.js";
 
-type SupportedLoaders = GLTFLoader | THREE.TextureLoader;
+type SupportedLoaders =
+  | GLTFLoader
+  | THREE.TextureLoader
+  | THREE.CubeTextureLoader;
 type SupportedFiles = GLTF | THREE.Texture;
 
 class Resources extends EventEmitter {
   private sources: Source[];
   private toLoad: number;
   private loaded: number;
-  private items: Record<Source["name"], SupportedFiles>;
-  private loaders: Record<Source["type"], SupportedLoaders>;
+  private items: Record<string, SupportedFiles>;
+  private loaders: Record<string, SupportedLoaders>;
 
   constructor() {
     super();
@@ -24,29 +27,53 @@ class Resources extends EventEmitter {
     this.startLoading();
   }
 
-  private initializeLoaders(): typeof this.loaders {
+  private initializeLoaders(): Record<string, SupportedLoaders> {
     const dracoLoader = new DRACOLoader();
     dracoLoader.setDecoderPath("./draco/");
     const gltfLoader = new GLTFLoader();
     gltfLoader.setDRACOLoader(dracoLoader);
     const textureLoader = new THREE.TextureLoader();
-    return { gltf: gltfLoader, texture: textureLoader };
+    const cubeTextureLoader = new THREE.CubeTextureLoader();
+    return {
+      gltf: gltfLoader,
+      texture: textureLoader,
+      cubeTexture: cubeTextureLoader,
+    };
   }
 
   private startLoading() {
-    this.sources.forEach(({ name, type, path }) => {
-      this.loaders[type].load(
-        path,
-        (file) => {
-          this.items[name] = file;
-          this.fileLoaded();
-        },
-        undefined,
-        (error) => {
-          console.error(`Error loading ${name}:`, error);
-          this.fileLoaded();
-        }
-      );
+    this.sources.forEach((source) => {
+      if (source.type === "cubeTexture") {
+        const loader = this.loaders[source.type] as THREE.CubeTextureLoader;
+        loader.load(
+          source.path as string[],
+          (texture) => {
+            this.items[source.name] = texture;
+            this.fileLoaded();
+          },
+          undefined,
+          (error) => {
+            console.error(`Error loading ${source.name}:`, error);
+            this.fileLoaded();
+          }
+        );
+      } else {
+        const loader = this.loaders[source.type] as
+          | GLTFLoader
+          | THREE.TextureLoader;
+        loader.load(
+          source.path as string,
+          (file) => {
+            this.items[source.name] = file;
+            this.fileLoaded();
+          },
+          undefined,
+          (error) => {
+            console.error(`Error loading ${source.name}:`, error);
+            this.fileLoaded();
+          }
+        );
+      }
     });
   }
 
