@@ -8,6 +8,7 @@ import Debug from "./utils/Debug";
 import Resources from "./utils/Resources";
 import World from "./world/World";
 import Canvas from "./utils/Canvas";
+import AudioListener from "./utils/AudioListener";
 
 class Experience {
   private static instance: Experience;
@@ -21,6 +22,7 @@ class Experience {
   camera!: Camera;
   renderer!: Renderer;
   world!: World;
+  listener!: AudioListener;
 
   constructor() {
     if (Experience.instance) {
@@ -38,6 +40,7 @@ class Experience {
     this.renderer = new Renderer();
     this.timer = new Timer();
     this.world = new World();
+    this.listener = new AudioListener();
 
     this.sizes.on("resize", () => this.resize());
     this.timer.on("tick", () => this.update());
@@ -60,10 +63,11 @@ class Experience {
     this.sizes.dispose();
     this.fullscreenHandler.dispose();
 
-    //  GEOMETRIES AND MATERIALS DISPOSE
+    // GEOMETRIES AND MATERIALS DISPOSE
     this.world.destroy();
-    this.camera.orbitControls.dispose();
+    this.camera.dispose();
     this.renderer.instance.dispose();
+
     if (this.debug.gui) {
       this.debug.dispose();
     }

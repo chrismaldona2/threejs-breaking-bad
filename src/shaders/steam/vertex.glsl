@@ -4,7 +4,7 @@ uniform float uTime;
 uniform sampler2D uTexture;
 
 uniform float uTwistSpeed;
-uniform float uTwistAmount;
+uniform float uTwistStrength;
 uniform float uWindSpeed;
 uniform float uWindStrength;
 uniform float uWindExponent;
@@ -15,7 +15,7 @@ void main() {
   vec3 newPosition = position;
 
   float perlinTwist = texture(uTexture, vec2(0.5, uv.y * 0.1 - uTime * uTwistSpeed)).r;
-  float angle = perlinTwist * uTwistAmount;
+  float angle = perlinTwist * uTwistStrength;
 
   newPosition.xz = rotate2D(newPosition.xz, angle);
 

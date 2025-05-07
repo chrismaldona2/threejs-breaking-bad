@@ -1,40 +1,38 @@
 import * as THREE from "three";
 import { GLTF } from "three/examples/jsm/Addons.js";
 import Experience from "../Experience";
-import acidVertexShader from "../../shaders/acid/vertex.glsl";
-import acidFragmentShader from "../../shaders/acid/fragment.glsl";
-import GUI from "lil-gui";
 import Steam, { SteamOptions } from "./Steam";
+import RadioController from "./RadioController";
+import AcidEffect from "./AcidEffect";
 
 class Lab {
-  private readonly experience: Experience;
+  private readonly experience = Experience.getInstance();
+  private readonly resources = this.experience.resources;
+  private readonly gui = this.experience.debug.gui;
+
   group: THREE.Group;
   lab?: THREE.Object3D;
   textures?: {
-    lab_texture_p1: THREE.Texture;
-    lab_texture_p2: THREE.Texture;
-    lab_texture_p3: THREE.Texture;
+    lab_p1: THREE.Texture;
+    lab_p2: THREE.Texture;
+    lab_p3: THREE.Texture;
   };
-  tweaks?: GUI;
-  acid?: {
-    mesh: THREE.Mesh;
-    material: THREE.ShaderMaterial;
-    outsideColor: string;
-    insideColor: string;
-  };
+
+  acidEffect?: AcidEffect;
   glass?: THREE.Mesh;
+
   coffeeSteam?: Steam;
+  greenChemicalSteam?: Steam;
   blueChemicalSteam?: Steam;
+  orangeChemicalSteam?: Steam;
+
+  radioController?: RadioController;
 
   constructor() {
-    this.experience = Experience.getInstance();
-
     this.group = new THREE.Group();
     this.init();
     this.group.scale.setScalar(0.025);
     this.experience.scene.add(this.group);
-
-    this.setupTweaks();
   }
 
   private init() {
@@ -50,85 +48,72 @@ class Lab {
   }
 
   private setupLab() {
-    const labModelFile = this.experience.resources.getAsset<GLTF>("lab_model");
+    const labModelFile = this.resources.getAsset<GLTF>("lab_model");
     if (!labModelFile) return null;
     this.lab = labModelFile.scene;
     this.group.add(this.lab);
   }
 
   private setupTextures() {
-    const lab_texture_p1 =
-      this.experience.resources.getAsset<THREE.Texture>("lab_texture_p1");
-    const lab_texture_p2 =
-      this.experience.resources.getAsset<THREE.Texture>("lab_texture_p2");
-    const lab_texture_p3 =
-      this.experience.resources.getAsset<THREE.Texture>("lab_texture_p3");
+    const lab_p1 = this.resources.getAsset<THREE.Texture>("lab_texture_p1");
+    const lab_p2 = this.resources.getAsset<THREE.Texture>("lab_texture_p2");
+    const lab_p3 = this.resources.getAsset<THREE.Texture>("lab_texture_p3");
 
-    if (!lab_texture_p1 || !lab_texture_p2 || !lab_texture_p3) return;
+    if (!lab_p1 || !lab_p2 || !lab_p3) return;
 
-    lab_texture_p1.flipY = false;
-    lab_texture_p1.colorSpace = THREE.SRGBColorSpace;
-    lab_texture_p2.flipY = false;
-    lab_texture_p2.colorSpace = THREE.SRGBColorSpace;
-    lab_texture_p3.flipY = false;
-    lab_texture_p3.colorSpace = THREE.SRGBColorSpace;
+    lab_p1.flipY = false;
+    lab_p1.colorSpace = THREE.SRGBColorSpace;
+    lab_p2.flipY = false;
+    lab_p2.colorSpace = THREE.SRGBColorSpace;
+    lab_p3.flipY = false;
+    lab_p3.colorSpace = THREE.SRGBColorSpace;
 
     this.textures = {
-      lab_texture_p1,
-      lab_texture_p2,
-      lab_texture_p3,
+      lab_p1,
+      lab_p2,
+      lab_p3,
     };
   }
 
-  private getMesh(name: string, source: THREE.Object3D): THREE.Mesh {
-    const m = source.getObjectByName(name);
-    if (!m || !(m instanceof THREE.Mesh)) {
+  private getMesh(name: string, source?: THREE.Object3D): THREE.Mesh {
+    const src = source ?? this.lab!;
+    const mesh = src.getObjectByName(name);
+
+    if (!mesh || !(mesh instanceof THREE.Mesh)) {
       throw new Error(`Lab: couldn’t find mesh named "${name}"`);
     }
-    return m;
+
+    return mesh;
   }
 
   private setupLabMaterials() {
     if (!this.lab || !this.textures) return;
-    this.lab.getObjectByName;
 
-    const p1_objects = this.getMesh("part1", this.lab);
-    const p2_objects = this.getMesh("part2", this.lab);
-    const p3_objects = this.getMesh("part3", this.lab);
+    const p1_objects = this.getMesh("part1");
+    const p2_objects = this.getMesh("part2");
+    const p3_objects = this.getMesh("part3");
 
     p1_objects.material = new THREE.MeshBasicMaterial({
-      map: this.textures.lab_texture_p1,
+      map: this.textures.lab_p1,
     });
     p2_objects.material = new THREE.MeshBasicMaterial({
-      map: this.textures.lab_texture_p2,
+      map: this.textures.lab_p2,
     });
     p3_objects.material = new THREE.MeshBasicMaterial({
-      map: this.textures.lab_texture_p3,
+      map: this.textures.lab_p3,
     });
   }
 
   private setupGlass() {
     if (!this.lab) return;
 
-    const glassModelFile =
-      this.experience.resources.getAsset<GLTF>("glass_model");
+    const glassModelFile = this.resources.getAsset<GLTF>("glass_model");
     if (!glassModelFile) return;
 
     this.glass = this.getMesh("glass", glassModelFile.scene);
 
-    // this.glass.material = new THREE.MeshPhysicalMaterial({
-    //   roughness: 0.2,
-    //   thickness: 0.1,
-    //   transmission: 0.85,
-    //   side: THREE.DoubleSide,
-    //   depthWrite: false,
-    // });
-
-    const envMap =
-      this.experience.resources.getAsset<THREE.CubeTexture>("env_map");
-    if (envMap) {
-      envMap.colorSpace = THREE.SRGBColorSpace;
-    }
+    const envMap = this.resources.getAsset<THREE.CubeTexture>("env_map");
+    if (envMap) envMap.colorSpace = THREE.SRGBColorSpace;
 
     this.glass.material = new THREE.MeshPhongMaterial({
       specular: 0xffffff,
@@ -150,22 +135,28 @@ class Lab {
   private setupRadio() {
     if (!this.lab || !this.textures) return;
 
-    const radio = this.getMesh("radio", this.lab);
+    const radio = this.getMesh("radio");
+    const buttons = this.getMesh("radio_buttons");
 
     radio.material = new THREE.MeshBasicMaterial({
-      map: this.textures.lab_texture_p3,
+      map: this.textures.lab_p3,
     });
+    buttons.material = new THREE.MeshBasicMaterial({
+      map: this.textures.lab_p2,
+    });
+
+    this.radioController = new RadioController([radio, buttons]);
   }
 
   private setupEmissive() {
     if (!this.lab) return;
 
-    const redLights = this.getMesh("red_lights", this.lab);
-    const greenLights = this.getMesh("green_lights", this.lab);
-    const blackLights = this.getMesh("black_lights", this.lab);
-    const whiteLights = this.getMesh("white_lights", this.lab);
-    const cabinetLights = this.getMesh("cabinet_light", this.lab);
-    const bigRedLight = this.getMesh("big_red_light", this.lab);
+    const redLights = this.getMesh("red_lights");
+    const greenLights = this.getMesh("green_lights");
+    const blackLights = this.getMesh("black_lights");
+    const whiteLights = this.getMesh("white_lights");
+    const cabinetLights = this.getMesh("cabinet_light");
+    const bigRedLight = this.getMesh("big_red_light");
 
     redLights.material = new THREE.MeshBasicMaterial({ color: 0xbe0014 });
     greenLights.material = new THREE.MeshBasicMaterial({ color: 0x68d500 });
@@ -186,7 +177,7 @@ class Lab {
     this.coffeeSteam.mesh.position.set(9.055, 2.4, 12.2);
     this.coffeeSteam.mesh.scale.set(0.22, 1.5, 0.22);
 
-    this.lab.add(this.coffeeSteam.mesh);
+    this.group.add(this.coffeeSteam.mesh);
   }
 
   private setupChemicalsSteams() {
@@ -195,116 +186,60 @@ class Lab {
     const chemicalSteamConf: SteamOptions = {
       steamOpacity: 0.5,
       steamUvScale: 0.26,
-      steamThresholdLow: 0.43,
-      steamThresholdHigh: 0.68,
-      twistAmount: 7,
+      steamThresholdLow: 0,
+      steamThresholdHigh: 0.75,
+      twistStrength: 7,
       windSpeed: 0.01,
       windStrength: 17.5,
       windExponent: 5,
     };
 
+    this.greenChemicalSteam = new Steam({
+      ...chemicalSteamConf,
+      color: "#8af4a7",
+      steamThresholdHigh: 1,
+      steamOpacity: 0.85,
+    });
+    this.greenChemicalSteam.mesh.scale.set(0.13, 1, 0.13);
+    this.greenChemicalSteam.mesh.position.set(0.834, 3.27, -4);
+
     this.blueChemicalSteam = new Steam({
       ...chemicalSteamConf,
       color: "#a8f5ff",
     });
-    this.blueChemicalSteam.mesh.position.set(1.515, 3.193, -4.35);
     this.blueChemicalSteam.mesh.scale.set(0.13, 1.4, 0.13);
+    this.blueChemicalSteam.mesh.position.set(1.515, 3.193, -4.35);
 
-    this.lab.add(this.blueChemicalSteam.mesh);
+    this.orangeChemicalSteam = new Steam({
+      ...chemicalSteamConf,
+      color: "#ffb22e",
+      steamOpacity: 0.6,
+      twistStrength: 11.25,
+      windStrength: 5.3,
+      steamUvScale: 0.08,
+      twistSpeed: 0.01,
+      steamThresholdLow: 0,
+      steamThresholdHigh: 1,
+    });
+    this.orangeChemicalSteam.mesh.scale.set(0.13, 0.85, 0.13);
+    this.orangeChemicalSteam.mesh.position.set(2.2, 3.18, -3.931);
+
+    this.group.add(
+      this.blueChemicalSteam.mesh,
+      this.greenChemicalSteam.mesh,
+      this.orangeChemicalSteam.mesh
+    );
   }
 
   private setupAcid() {
     if (!this.lab) return;
-
-    const acid = this.getMesh("acid", this.lab);
-    acid.scale.setScalar(1.4);
-
-    const acidMaterial = new THREE.ShaderMaterial({
-      vertexShader: acidVertexShader,
-      fragmentShader: acidFragmentShader,
-      uniforms: {
-        uTime: new THREE.Uniform(0),
-        uAnimationSpeed: new THREE.Uniform(0.15),
-        uFrequency: new THREE.Uniform(2.5),
-        uOutsideColor: new THREE.Uniform(new THREE.Color("#d6ffb3")),
-        uInsideColor: new THREE.Uniform(new THREE.Color("#befb88")),
-        uOuterGlowScale: new THREE.Uniform(1.5),
-        uOuterGlowOffset: new THREE.Uniform(-0.485),
-        uStepThreshold: new THREE.Uniform(-0.005),
-        uStepStrength: new THREE.Uniform(0.37),
-      },
-    });
-
-    acid.material = acidMaterial;
-
-    this.acid = {
-      mesh: acid,
-      material: acidMaterial,
-      outsideColor: "#d6ffb3",
-      insideColor: "#befb88",
-    };
+    const acid = this.getMesh("acid");
+    this.acidEffect = new AcidEffect(acid);
   }
 
   setupTweaks() {
-    this.tweaks = this.experience.debug.gui;
-    if (this.acid) {
-      const acidTweaks = this.tweaks.addFolder("Acid");
-      acidTweaks.close();
-      acidTweaks
-        .add(this.acid.material.uniforms.uAnimationSpeed, "value")
-        .min(0)
-        .max(2)
-        .step(0.01)
-        .name("animationSpeed");
-      acidTweaks
-        .add(this.acid.material.uniforms.uFrequency, "value")
-        .min(0)
-        .max(8)
-        .step(0.1)
-        .name("frequency");
-
-      acidTweaks
-        .add(this.acid.material.uniforms.uOuterGlowScale, "value")
-        .min(0)
-        .max(4)
-        .step(0.01)
-        .name("glowScale");
-
-      acidTweaks
-        .add(this.acid.material.uniforms.uOuterGlowOffset, "value")
-        .min(-1)
-        .max(1)
-        .step(0.001)
-        .name("glowOffset");
-
-      acidTweaks
-        .add(this.acid.material.uniforms.uStepThreshold, "value")
-        .min(-0.5)
-        .max(0.5)
-        .step(0.001)
-        .name("stepThreshold");
-
-      acidTweaks
-        .add(this.acid.material.uniforms.uStepStrength, "value")
-        .min(0)
-        .max(2)
-        .step(0.001)
-        .name("stepStrength");
-
-      acidTweaks.addColor(this.acid, "outsideColor").onChange(() => {
-        this.acid!.material.uniforms.uOutsideColor.value.set(
-          this.acid!.outsideColor
-        );
-      });
-      acidTweaks.addColor(this.acid, "insideColor").onChange(() => {
-        this.acid!.material.uniforms.uInsideColor.value.set(
-          this.acid!.insideColor
-        );
-      });
-    }
-
     if (this.glass?.material instanceof THREE.MeshPhongMaterial) {
-      const glassTweaks = this.tweaks.addFolder("Glass");
+      const glassTweaks = this.gui.addFolder("Glass");
       glassTweaks.close();
       glassTweaks
         .add(this.glass.material, "opacity")
@@ -325,7 +260,7 @@ class Lab {
       const debug = {
         color: this.coffeeSteam.material.uniforms.uColor.value.getHex(),
       };
-      const coffeSteamTweaks = this.tweaks.addFolder("CoffeeSteam");
+      const coffeSteamTweaks = this.gui.addFolder("CoffeeSteam");
       coffeSteamTweaks.close();
       coffeSteamTweaks.addColor(debug, "color").onChange(() => {
         this.coffeeSteam!.material.uniforms.uColor.value.set(debug.color);
@@ -333,137 +268,51 @@ class Lab {
       coffeSteamTweaks.add(this.coffeeSteam.material, "wireframe");
     }
 
-    if (this.blueChemicalSteam) {
-      const debug = {
-        color: this.blueChemicalSteam.material.uniforms.uColor.value.getHex(),
+    if (this.acidEffect) this.acidEffect.setupTweaks();
+
+    if (this.radioController) {
+      const radioDebug = {
+        volume: 70,
       };
-      const blueChemicalTweaks = this.tweaks.addFolder("BlueChemicalSteam");
-
-      blueChemicalTweaks
-        .add(this.blueChemicalSteam.mesh.position, "x")
-        .min(0)
-        .max(4)
-        .step(0.001)
-        .name("positionX");
-      blueChemicalTweaks
-        .add(this.blueChemicalSteam.mesh.position, "y")
-        .min(0)
-        .max(4)
-        .step(0.001)
-        .name("positionY");
-      blueChemicalTweaks
-        .add(this.blueChemicalSteam.mesh.position, "z")
-        .min(-6)
-        .max(0)
-        .step(0.001)
-        .name("positionZ");
-
-      blueChemicalTweaks
-        .add(this.blueChemicalSteam.mesh.scale, "x")
-        .min(0)
-        .max(2)
-        .step(0.001)
-        .name("scaleX");
-      blueChemicalTweaks
-        .add(this.blueChemicalSteam.mesh.scale, "y")
-        .min(0)
-        .max(3)
-        .step(0.001)
-        .name("scaleY");
-      blueChemicalTweaks
-        .add(this.blueChemicalSteam.mesh.scale, "z")
-        .min(0)
-        .max(2)
-        .step(0.001)
-        .name("scaleZ");
-
-      blueChemicalTweaks.addColor(debug, "color").onChange(() => {
-        this.blueChemicalSteam!.material.uniforms.uColor.value.set(debug.color);
-      });
-      blueChemicalTweaks
-        .add(this.blueChemicalSteam.material.uniforms.uSteamOpacity, "value")
-        .min(0)
-        .max(1)
-        .step(0.01)
-        .name("opacity");
-
-      blueChemicalTweaks
-        .add(this.blueChemicalSteam.material.uniforms.uSteamUvScale, "value")
-        .min(0)
-        .max(1)
-        .step(0.01)
-        .name("uvScale");
-      blueChemicalTweaks
-        .add(this.blueChemicalSteam.material.uniforms.uSteamSpeed, "value")
-        .min(0)
-        .max(0.5)
-        .step(0.001)
-        .name("speed");
-      blueChemicalTweaks
-        .add(
-          this.blueChemicalSteam.material.uniforms.uSteamThresholdLow,
-          "value"
-        )
-        .min(0)
-        .max(1)
-        .step(0.001)
-        .name("steamThresholdLow");
-      blueChemicalTweaks
-        .add(
-          this.blueChemicalSteam.material.uniforms.uSteamThresholdHigh,
-          "value"
-        )
-        .min(0)
-        .max(1)
-        .step(0.001)
-        .name("steamThresholdHigh");
-      blueChemicalTweaks
-        .add(this.blueChemicalSteam.material.uniforms.uTwistSpeed, "value")
-        .min(0)
-        .max(0.5)
-        .step(0.001)
-        .name("twistSpeed");
-      blueChemicalTweaks
-        .add(this.blueChemicalSteam.material.uniforms.uTwistAmount, "value")
-        .min(0)
-        .max(14)
-        .step(0.01)
-        .name("twistAmount");
-      blueChemicalTweaks
-        .add(this.blueChemicalSteam.material.uniforms.uWindSpeed, "value")
-        .min(0)
-        .max(0.1)
-        .step(0.001)
-        .name("windSpeed");
-      blueChemicalTweaks
-        .add(this.blueChemicalSteam.material.uniforms.uWindStrength, "value")
+      const radioTweaks = this.gui.addFolder("Radio");
+      radioTweaks.close();
+      radioTweaks
+        .add(radioDebug, "volume")
         .min(0)
         .max(100)
-        .step(0.01)
-        .name("windStrength");
-      blueChemicalTweaks
-        .add(this.blueChemicalSteam.material.uniforms.uWindExponent, "value")
-        .min(0)
-        .max(7)
-        .step(1)
-        .name("windExponent");
-      blueChemicalTweaks.add(this.blueChemicalSteam.material, "wireframe");
+        .onChange(() => {
+          this.radioController!.setVolume(radioDebug.volume / 100);
+        });
     }
   }
 
   update() {
-    if (this.acid) {
-      this.acid.material.uniforms.uTime.value =
-        this.experience.timer.elapsedTime;
-    }
-
+    this.acidEffect?.update();
     this.coffeeSteam?.update();
+    this.greenChemicalSteam?.update();
     this.blueChemicalSteam?.update();
+    this.orangeChemicalSteam?.update();
   }
 
   destroy() {
+    this.acidEffect?.dispose();
     this.coffeeSteam?.dispose();
+    this.greenChemicalSteam?.dispose();
     this.blueChemicalSteam?.dispose();
+    this.orangeChemicalSteam?.dispose();
+    this.radioController?.dispose();
+
+    this.group.traverse((child) => {
+      if (child instanceof THREE.Mesh) {
+        child.geometry.dispose();
+        if (Array.isArray(child.material)) {
+          child.material.forEach((mat) => mat.dispose());
+        } else {
+          child.material.dispose();
+        }
+      }
+    });
+    this.experience.scene.remove(this.group);
   }
 }
 

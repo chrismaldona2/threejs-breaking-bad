@@ -1,16 +1,14 @@
 import * as THREE from "three";
 import Experience from "./Experience";
-import Sizes from "./utils/Sizes";
 
 class Renderer {
-  experience: Experience;
+  private readonly experience = Experience.getInstance();
+  private readonly sizes = this.experience.sizes;
+
   instance: THREE.WebGLRenderer;
-  sizes: Sizes;
-  clearColor: string = "#100e1d";
+  private clearColor: string = "#100e1d";
 
   constructor() {
-    this.experience = Experience.getInstance();
-
     this.sizes = this.experience.sizes;
     this.instance = new THREE.WebGLRenderer({
       canvas: this.experience.canvas.domElement,

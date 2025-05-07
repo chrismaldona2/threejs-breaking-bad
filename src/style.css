@@ -11,6 +11,23 @@ body {
 }
 
 .lil-gui {
-  --width: min(95%, 400px);
+  --width: min(95%, 425px);
+  --title-background-color: #211d39;
+  --widget-height: 1.25rem;
+  --widget-color: #211d39;
+  --hover-color: #221f34;
+  --focus-color: #524a7e;
+  --font-size: 0.75rem;
+  --padding: 0.5rem;
+  --spacing: 0.5rem;
+  --number-color: #a898ff;
+  --string-color: #ca98ff;
+
+  top: 0.3rem !important;
   right: 0.5rem !important;
+  user-select: none;
+}
+
+.lil-gui .children {
+  background: #2e2850;
 }

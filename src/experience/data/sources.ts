@@ -10,7 +10,7 @@ const sources: Source[] = [
   {
     name: "lab_model",
     type: "gltf",
-    path: "./models/lab.glb",
+    path: "./models/lab_3.glb",
   },
   {
     name: "glass_model",
