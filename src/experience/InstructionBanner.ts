@@ -13,7 +13,7 @@ class InstructionBanner {
 
     const codeLink = document.createElement("a");
     codeLink.classList.add("instruction_banner__link");
-    codeLink.href = "";
+    codeLink.href = "https://github.com/chrismaldona2/threejs-breaking-bad.git";
     codeLink.target = "_blank";
     codeLink.innerText = "Source Code";
 
