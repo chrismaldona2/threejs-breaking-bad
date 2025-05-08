@@ -3,7 +3,8 @@ import Experience from "./Experience";
 import { OrbitControls } from "three/examples/jsm/Addons.js";
 
 class Camera {
-  private experience = Experience.getInstance();
+  private readonly experience = Experience.getInstance();
+  private readonly gui = this.experience.debug.gui;
 
   private sizes = this.experience.sizes;
 
@@ -29,10 +30,10 @@ class Camera {
   private setupBounds() {
     if (this.instance instanceof THREE.PerspectiveCamera) {
       this.boundsMin = new THREE.Vector3(-0.32, 0, -0.1);
-      this.boundsMax = new THREE.Vector3(2, 5, 1);
+      this.boundsMax = new THREE.Vector3(2, 5, 3);
     } else {
       this.boundsMin = new THREE.Vector3(0, 0, 0.1);
-      this.boundsMax = new THREE.Vector3(2, 10, 2);
+      this.boundsMax = new THREE.Vector3(2, 10, 1.75);
     }
   }
 
@@ -70,15 +71,20 @@ class Camera {
 
     if (this.instance instanceof THREE.PerspectiveCamera) {
       this.orbitControls.target.set(-0.05, 0, 0);
-    } else {
+    } else if (this.instance instanceof THREE.OrthographicCamera) {
       this.orbitControls.target.set(-0.05, 0.175, 0);
     }
 
     this.orbitControls.enableDamping = true;
     this.orbitControls.dampingFactor = 0.05;
     this.orbitControls.panSpeed = 0.5;
+
     this.orbitControls.minDistance = 0.1;
-    this.orbitControls.maxDistance = 1;
+    this.orbitControls.maxDistance = 3;
+
+    this.orbitControls.minZoom = 0.4;
+    this.orbitControls.maxZoom = 6;
+
     this.orbitControls.maxPolarAngle = Math.PI / 2.1;
     this.orbitControls.zoomSpeed = 0.5;
   }
@@ -102,9 +108,7 @@ class Camera {
       },
     };
 
-    this.experience.debug.gui
-      .add(debugObj, "switchCamera")
-      .name("Switch Camera");
+    this.gui.add(debugObj, "switchCamera").name("Switch Camera");
   }
 
   resize() {
