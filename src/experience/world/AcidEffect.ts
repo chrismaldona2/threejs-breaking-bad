@@ -2,10 +2,12 @@ import * as THREE from "three";
 import Experience from "../Experience";
 import acidVertexShader from "../../shaders/acid/vertex.glsl";
 import acidFragmentShader from "../../shaders/acid/fragment.glsl";
+import GUI from "lil-gui";
 
 class AcidEffect {
   private readonly experience = Experience.getInstance();
   private readonly gui = this.experience.debug.gui;
+  private tweaks?: GUI;
   private readonly timer = this.experience.timer;
 
   mesh: THREE.Mesh;
@@ -40,51 +42,52 @@ class AcidEffect {
 
   dispose() {
     this.material.dispose();
+    this.tweaks?.destroy();
   }
 
   setupTweaks() {
-    const tweaks = this.gui.addFolder("Acid");
-    tweaks.close();
-    tweaks
+    this.tweaks = this.gui.addFolder("Acid");
+    this.tweaks.close();
+    this.tweaks
       .add(this.material.uniforms.uAnimationSpeed, "value")
       .min(0)
       .max(2)
       .step(0.01)
       .name("animationSpeed");
-    tweaks
+    this.tweaks
       .add(this.material.uniforms.uFrequency, "value")
       .min(0)
       .max(8)
       .step(0.1)
       .name("frequency");
-    tweaks
+    this.tweaks
       .add(this.material.uniforms.uOuterGlowScale, "value")
       .min(0)
       .max(4)
       .step(0.01)
       .name("glowScale");
-    tweaks
+    this.tweaks
       .add(this.material.uniforms.uOuterGlowOffset, "value")
       .min(-1)
       .max(1)
       .step(0.001)
       .name("glowOffset");
-    tweaks
+    this.tweaks
       .add(this.material.uniforms.uStepThreshold, "value")
       .min(-0.5)
       .max(0.5)
       .step(0.001)
       .name("stepThreshold");
-    tweaks
+    this.tweaks
       .add(this.material.uniforms.uStepStrength, "value")
       .min(0)
       .max(2)
       .step(0.001)
       .name("stepStrength");
-    tweaks.addColor(this, "outsideColor").onChange(() => {
+    this.tweaks.addColor(this, "outsideColor").onChange(() => {
       this.material.uniforms.uOutsideColor.value.set(this.outsideColor);
     });
-    tweaks.addColor(this, "insideColor").onChange(() => {
+    this.tweaks.addColor(this, "insideColor").onChange(() => {
       this.material.uniforms.uInsideColor.value.set(this.insideColor);
     });
   }

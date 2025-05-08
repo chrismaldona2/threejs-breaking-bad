@@ -30,5 +30,9 @@ class Renderer {
       this.experience.camera.instance
     );
   }
+
+  dispose() {
+    this.instance.dispose();
+  }
 }
 export default Renderer;

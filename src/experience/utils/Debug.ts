@@ -5,6 +5,7 @@ class Debug {
 
   constructor() {
     this.gui = new GUI({ title: "Tweaks" });
+    this.gui.hide();
     this.gui.close();
     window.addEventListener("keydown", this.handleKeydown);
   }

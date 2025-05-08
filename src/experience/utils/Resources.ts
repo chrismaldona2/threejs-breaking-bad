@@ -1,91 +1,121 @@
 import * as THREE from "three";
-import sources, { Source } from "../data/sources";
+import sources from "../data/sources";
 import EventEmitter from "./EventEmitter";
 import { DRACOLoader, GLTF, GLTFLoader } from "three/examples/jsm/Addons.js";
 
-type SupportedLoaders =
-  | GLTFLoader
-  | THREE.TextureLoader
-  | THREE.CubeTextureLoader;
-type SupportedFiles = GLTF | THREE.Texture;
+type Loaders = {
+  gltf: GLTFLoader;
+  texture: THREE.TextureLoader;
+  cubeTexture: THREE.CubeTextureLoader;
+  audio: THREE.AudioLoader;
+};
+
+type SupportedFiles = GLTF | THREE.Texture | THREE.CubeTexture | AudioBuffer;
 
 class Resources extends EventEmitter {
-  private sources: Source[];
-  private toLoad: number;
-  private loaded: number;
-  private items: Record<string, SupportedFiles>;
-  private loaders: Record<string, SupportedLoaders>;
+  private sources = sources;
+  private resources: Record<string, SupportedFiles>;
+  private loaders: Loaders;
+
+  private toLoad = sources.length;
+  private loaded = 0;
+  loadProgress = 0;
 
   constructor() {
     super();
-    this.sources = sources;
-    this.loaded = 0;
-    this.toLoad = sources.length;
-    this.loaders = this.initializeLoaders();
-    this.items = {};
-
+    this.resources = {};
+    this.loaders = this.initLoaders();
     this.startLoading();
   }
 
-  private initializeLoaders(): Record<string, SupportedLoaders> {
+  private initLoaders(): Loaders {
     const dracoLoader = new DRACOLoader();
     dracoLoader.setDecoderPath("./draco/");
+
     const gltfLoader = new GLTFLoader();
     gltfLoader.setDRACOLoader(dracoLoader);
-    const textureLoader = new THREE.TextureLoader();
-    const cubeTextureLoader = new THREE.CubeTextureLoader();
+
     return {
       gltf: gltfLoader,
-      texture: textureLoader,
-      cubeTexture: cubeTextureLoader,
+      texture: new THREE.TextureLoader(),
+      audio: new THREE.AudioLoader(),
+      cubeTexture: new THREE.CubeTextureLoader(),
     };
   }
 
   private startLoading() {
-    this.sources.forEach((source) => {
-      if (source.type === "cubeTexture") {
-        const loader = this.loaders[source.type] as THREE.CubeTextureLoader;
-        loader.load(
-          source.path as string[],
-          (texture) => {
-            this.items[source.name] = texture;
-            this.fileLoaded();
-          },
-          undefined,
-          (error) => {
-            console.error(`Error loading ${source.name}:`, error);
-            this.fileLoaded();
-          }
-        );
-      } else {
-        const loader = this.loaders[source.type] as
-          | GLTFLoader
-          | THREE.TextureLoader;
-        loader.load(
-          source.path as string,
-          (file) => {
-            this.items[source.name] = file;
-            this.fileLoaded();
-          },
-          undefined,
-          (error) => {
-            console.error(`Error loading ${source.name}:`, error);
-            this.fileLoaded();
-          }
-        );
+    this.sources.forEach((src) => {
+      switch (src.type) {
+        case "gltf":
+          this.loaders.gltf.load(
+            src.path,
+            (gltf) => this.handleLoadSuccess(src.name, gltf),
+            undefined,
+            (error) => this.handleLoadError(src.name, error)
+          );
+          break;
+        case "texture":
+          this.loaders.texture.load(
+            src.path,
+            (tex) => this.handleLoadSuccess(src.name, tex),
+            undefined,
+            (error) => this.handleLoadError(src.name, error)
+          );
+          break;
+        case "audio":
+          this.loaders.audio.load(
+            src.path,
+            (buffer) => this.handleLoadSuccess(src.name, buffer),
+            undefined,
+            (error) => this.handleLoadError(src.name, error)
+          );
+          break;
+        case "cubeTexture":
+          this.loaders.cubeTexture.load(
+            src.path,
+            (cubeTex) => this.handleLoadSuccess(src.name, cubeTex),
+            undefined,
+            (error) => this.handleLoadError(src.name, error)
+          );
+          break;
       }
     });
   }
 
-  private fileLoaded() {
+  private handleLoadSuccess(name: string, asset: SupportedFiles) {
+    this.resources[name] = asset;
     this.loaded++;
-    if (this.toLoad === this.loaded) {
-      this.trigger("loaded");
+    this.loadProgress = this.loaded / this.toLoad;
+    this.trigger("fileLoaded");
+
+    if (this.loaded === this.toLoad) {
+      this.trigger("loadFinish");
     }
   }
 
-  getAsset<T extends SupportedFiles>(name: string): T | undefined {
-    return this.items[name] as T;
+  private handleLoadError(name: string, error: unknown) {
+    console.error(`Error loading ${name}:`, error);
+    this.loaded++;
+    this.loadProgress = this.loaded / this.toLoad;
+    this.trigger("fileLoaded");
+
+    if (this.loaded === this.toLoad) {
+      this.trigger("loadFinish");
+    }
+  }
+
+  getAsset<T extends SupportedFiles>(name: string): T {
+    const asset = this.resources[name] as T;
+
+    if (!asset)
+      throw new Error(`There was an error trying to retrieve ${name}`);
+
+    return asset;
+  }
+
+  dispose() {
+    this.off("fileLoaded");
+    this.off("loadFinish");
   }
 }
 

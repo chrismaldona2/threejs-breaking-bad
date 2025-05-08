@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import Canvas from "./Canvas";
 import Sizes from "./utils/Sizes";
 import FullscreenHandler from "./utils/FullscreenHandler";
 import Camera from "./Camera";
@@ -7,8 +8,8 @@ import Timer from "./utils/Timer";
 import Debug from "./utils/Debug";
 import Resources from "./utils/Resources";
 import World from "./world/World";
-import Canvas from "./utils/Canvas";
 import AudioListener from "./utils/AudioListener";
+import LoadingScreen from "./LoadingScreen";
 
 class Experience {
   private static instance: Experience;
@@ -16,11 +17,12 @@ class Experience {
   sizes!: Sizes;
   canvas!: Canvas;
   fullscreenHandler!: FullscreenHandler;
-  resources!: Resources;
   scene!: THREE.Scene;
-  timer!: Timer;
   camera!: Camera;
+  timer!: Timer;
   renderer!: Renderer;
+  resources!: Resources;
+  loadingScreen!: LoadingScreen;
   world!: World;
   listener!: AudioListener;
 
@@ -30,15 +32,16 @@ class Experience {
     }
     Experience.instance = this;
 
-    this.canvas = new Canvas();
-    this.fullscreenHandler = new FullscreenHandler(this.canvas.domElement);
     this.debug = new Debug();
     this.sizes = new Sizes();
+    this.canvas = new Canvas();
+    this.fullscreenHandler = new FullscreenHandler(this.canvas.domElement);
     this.scene = new THREE.Scene();
-    this.resources = new Resources();
     this.camera = new Camera();
-    this.renderer = new Renderer();
     this.timer = new Timer();
+    this.renderer = new Renderer();
+    this.resources = new Resources();
+    this.loadingScreen = new LoadingScreen();
     this.world = new World();
     this.listener = new AudioListener();
 
@@ -58,20 +61,18 @@ class Experience {
   }
 
   destroy() {
-    this.timer.off("tick");
-    this.resources.off("loaded");
+    this.timer.dispose();
+    this.resources.dispose();
     this.sizes.dispose();
     this.fullscreenHandler.dispose();
 
-    // GEOMETRIES AND MATERIALS DISPOSE
     this.world.destroy();
     this.camera.dispose();
-    this.renderer.instance.dispose();
+    this.renderer.dispose();
 
-    if (this.debug.gui) {
-      this.debug.dispose();
-    }
+    this.debug.dispose();
     this.canvas.destroy();
+    this.loadingScreen.destroy();
   }
 
   static getInstance(): Experience {

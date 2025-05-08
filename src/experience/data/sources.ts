@@ -1,16 +1,19 @@
-type SupportedTypes = "gltf" | "texture" | "cubeTexture";
+type GLTFSource = { name: string; type: "gltf"; path: string };
+type TextureSource = { name: string; type: "texture"; path: string };
+type AudioSource = { name: string; type: "audio"; path: string };
+type CubeTextureSource = { name: string; type: "cubeTexture"; path: string[] };
 
-export type Source = {
-  name: string;
-  type: SupportedTypes;
-  path: string | string[];
-};
+export type Source =
+  | GLTFSource
+  | TextureSource
+  | AudioSource
+  | CubeTextureSource;
 
 const sources: Source[] = [
   {
     name: "lab_model",
     type: "gltf",
-    path: "./models/lab_3.glb",
+    path: "./models/lab.glb",
   },
   {
     name: "glass_model",
@@ -48,6 +51,16 @@ const sources: Source[] = [
       "./textures/envmap/pz.webp",
       "./textures/envmap/nz.webp",
     ],
+  },
+  {
+    name: "main_theme",
+    type: "audio",
+    path: "./audio/main_theme.mp3",
+  },
+  {
+    name: "switch_sfx",
+    type: "audio",
+    path: "./audio/switch_2.mp3",
   },
 ];
 

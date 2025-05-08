@@ -18,5 +18,9 @@ class Timer extends EventEmitter {
     this.elapsedTime = this.instance.getElapsed();
     this.trigger("tick");
   };
+
+  dispose() {
+    this.off("tick");
+  }
 }
 export default Timer;

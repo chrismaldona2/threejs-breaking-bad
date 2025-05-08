@@ -1,54 +1,36 @@
 import * as THREE from "three";
 import Experience from "../Experience";
 import { animate } from "motion";
+import GUI from "lil-gui";
 
 class RadioController {
   private readonly experience = Experience.getInstance();
+  private readonly resources = this.experience.resources;
+  private readonly gui = this.experience.debug.gui;
+  private tweaks?: GUI;
   private readonly radio: THREE.Mesh[];
 
   private isOn = false;
   private music: THREE.PositionalAudio;
   private switchSound: THREE.PositionalAudio;
-  private loader = new THREE.AudioLoader();
-  private volume = 0.7;
+
+  private volume = 0.75;
+  private refDistance = 0.03;
+  private rollOffFactor = 1.5;
 
   private raycaster: THREE.Raycaster;
   private mouseTracker: THREE.Vector2;
 
   constructor(radioMesh: THREE.Mesh | THREE.Mesh[]) {
     this.radio = Array.isArray(radioMesh) ? radioMesh : [radioMesh];
-    this.music = new THREE.PositionalAudio(this.experience.listener.instance);
 
-    this.loader.load(
-      "./audio/main_theme.mp3",
-      (buffer) => {
-        this.music.setBuffer(buffer);
-        this.music.setLoop(true);
-        this.music.setRefDistance(0.02);
-        this.music.setRolloffFactor(1.5);
-        this.music.setDistanceModel("exponential");
-        this.music.setVolume(this.volume);
-      },
-      undefined,
-      (err) => console.error(`Error loading "Main Theme" song:`, err)
-    );
+    this.music = new THREE.PositionalAudio(this.experience.listener.instance);
+    this.setupMusic();
 
     this.switchSound = new THREE.PositionalAudio(
       this.experience.listener.instance
     );
-    this.loader.load(
-      "./audio/switch_2.mp3",
-      (buffer) => {
-        this.switchSound.setBuffer(buffer);
-        this.switchSound.setLoop(false);
-        this.switchSound.setRefDistance(0.05);
-        this.switchSound.setRolloffFactor(1.5);
-        this.switchSound.setDistanceModel("exponential");
-        this.switchSound.setVolume(this.volume);
-      },
-      undefined,
-      (err) => console.error(`Error loading "Switch" sound effect:`, err)
-    );
+    this.setupSwitchSound();
 
     this.radio.forEach((mesh) => {
       mesh.add(this.music, this.switchSound);
@@ -75,6 +57,26 @@ class RadioController {
   setVolume(volume: number) {
     this.volume = Math.max(0.0, Math.min(1.0, volume));
     this.music.setVolume(this.volume);
+    this.switchSound.setVolume(this.volume);
+  }
+
+  private setupMusic() {
+    const buffer = this.resources.getAsset<AudioBuffer>("main_theme");
+    this.music.setBuffer(buffer);
+    this.music.setLoop(true);
+    this.music.setRefDistance(this.refDistance);
+    this.music.setRolloffFactor(this.rollOffFactor);
+    this.music.setDistanceModel("exponential");
+    this.music.setVolume(this.volume);
+  }
+
+  private setupSwitchSound() {
+    const buffer = this.resources.getAsset<AudioBuffer>("switch_sfx");
+    this.switchSound.setBuffer(buffer);
+    this.switchSound.setLoop(false);
+    this.switchSound.setRefDistance(this.refDistance + 0.02);
+    this.switchSound.setRolloffFactor(this.rollOffFactor);
+    this.switchSound.setDistanceModel("exponential");
     this.switchSound.setVolume(this.volume);
   }
 
@@ -123,12 +125,50 @@ class RadioController {
     }
   };
 
+  setupTweaks() {
+    const radioDebug = {
+      volume: this.volume * 100,
+      refDistance: this.refDistance,
+      rollOffFactor: this.rollOffFactor,
+    };
+
+    this.tweaks = this.gui.addFolder("Radio");
+    this.tweaks.close();
+
+    this.tweaks
+      .add(radioDebug, "volume")
+      .min(0)
+      .max(100)
+      .onChange(() => {
+        this.setVolume(radioDebug.volume / 100);
+      });
+    this.tweaks
+      .add(radioDebug, "refDistance")
+      .min(0)
+      .max(1)
+      .step(0.001)
+      .onChange(() => {
+        this.music.setRefDistance(radioDebug.refDistance);
+        this.switchSound.setRefDistance(radioDebug.refDistance + 0.02);
+      });
+    this.tweaks
+      .add(radioDebug, "rollOffFactor")
+      .min(0)
+      .max(3)
+      .step(0.001)
+      .onChange(() => {
+        this.music.setRolloffFactor(radioDebug.rollOffFactor);
+        this.switchSound.setRolloffFactor(radioDebug.rollOffFactor);
+      });
+  }
+
   dispose() {
     window.removeEventListener("mousemove", this.handleMouseMove);
     window.removeEventListener("click", this.handleClick);
     this.radio.forEach((mesh) => {
       mesh.remove(this.music, this.switchSound);
     });
+    this.tweaks?.destroy();
   }
 }
 

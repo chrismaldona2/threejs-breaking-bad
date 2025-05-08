@@ -38,13 +38,13 @@ class Steam {
   mesh: THREE.Mesh;
   geometry: THREE.PlaneGeometry;
   material: THREE.ShaderMaterial;
-  private texture?: THREE.Texture;
 
   constructor(options: SteamOptions = {}) {
     this.experience = Experience.getInstance();
 
-    this.texture = this.resources.getAsset<THREE.Texture>("steam_texture");
-    this.setupTexture();
+    const texture = this.resources.getAsset<THREE.Texture>("steam_texture");
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
 
     this.geometry = new THREE.PlaneGeometry(1, 1, 10, 32);
     this.geometry.translate(0, 0.5, 0);
@@ -59,7 +59,7 @@ class Steam {
       depthWrite: false,
       uniforms: {
         uTime: new THREE.Uniform(0),
-        uTexture: new THREE.Uniform(this.texture),
+        uTexture: new THREE.Uniform(texture),
         uColor: new THREE.Uniform(new THREE.Color(mergedOpts.color)),
         uTwistSpeed: new THREE.Uniform(mergedOpts.twistSpeed),
         uTwistStrength: new THREE.Uniform(mergedOpts.twistStrength),
@@ -79,12 +79,6 @@ class Steam {
 
   update() {
     this.material.uniforms.uTime.value = this.experience.timer.elapsedTime;
-  }
-
-  setupTexture() {
-    if (!this.texture) return;
-    this.texture.wrapS = THREE.RepeatWrapping;
-    this.texture.wrapT = THREE.RepeatWrapping;
   }
 
   dispose() {

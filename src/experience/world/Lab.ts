@@ -4,6 +4,7 @@ import Experience from "../Experience";
 import Steam, { SteamOptions } from "./Steam";
 import RadioController from "./RadioController";
 import AcidEffect from "./AcidEffect";
+import GUI from "lil-gui";
 
 class Lab {
   private readonly experience = Experience.getInstance();
@@ -19,9 +20,13 @@ class Lab {
   };
 
   acidEffect?: AcidEffect;
+
   glass?: THREE.Mesh;
+  private glassTweaks?: GUI;
 
   coffeeSteam?: Steam;
+  private coffeeSteamTweaks?: GUI;
+
   greenChemicalSteam?: Steam;
   blueChemicalSteam?: Steam;
   orangeChemicalSteam?: Steam;
@@ -49,7 +54,6 @@ class Lab {
 
   private setupLab() {
     const labModelFile = this.resources.getAsset<GLTF>("lab_model");
-    if (!labModelFile) return null;
     this.lab = labModelFile.scene;
     this.group.add(this.lab);
   }
@@ -58,8 +62,6 @@ class Lab {
     const lab_p1 = this.resources.getAsset<THREE.Texture>("lab_texture_p1");
     const lab_p2 = this.resources.getAsset<THREE.Texture>("lab_texture_p2");
     const lab_p3 = this.resources.getAsset<THREE.Texture>("lab_texture_p3");
-
-    if (!lab_p1 || !lab_p2 || !lab_p3) return;
 
     lab_p1.flipY = false;
     lab_p1.colorSpace = THREE.SRGBColorSpace;
@@ -108,12 +110,10 @@ class Lab {
     if (!this.lab) return;
 
     const glassModelFile = this.resources.getAsset<GLTF>("glass_model");
-    if (!glassModelFile) return;
-
     this.glass = this.getMesh("glass", glassModelFile.scene);
 
     const envMap = this.resources.getAsset<THREE.CubeTexture>("env_map");
-    if (envMap) envMap.colorSpace = THREE.SRGBColorSpace;
+    envMap.colorSpace = THREE.SRGBColorSpace;
 
     this.glass.material = new THREE.MeshPhongMaterial({
       specular: 0xffffff,
@@ -239,51 +239,37 @@ class Lab {
 
   setupTweaks() {
     if (this.glass?.material instanceof THREE.MeshPhongMaterial) {
-      const glassTweaks = this.gui.addFolder("Glass");
-      glassTweaks.close();
-      glassTweaks
+      this.glassTweaks = this.gui.addFolder("Glass");
+      this.glassTweaks.close();
+      this.glassTweaks
         .add(this.glass.material, "opacity")
         .min(0)
         .max(1)
         .step(0.01)
         .name("opacity");
-      glassTweaks
+      this.glassTweaks
         .add(this.glass.material, "shininess")
         .min(0)
         .max(200)
         .step(1)
         .name("shininess");
-      glassTweaks.add(this.glass.material, "reflectivity").min(0).max(1);
+      this.glassTweaks.add(this.glass.material, "reflectivity").min(0).max(1);
     }
 
     if (this.coffeeSteam) {
       const debug = {
         color: this.coffeeSteam.material.uniforms.uColor.value.getHex(),
       };
-      const coffeSteamTweaks = this.gui.addFolder("CoffeeSteam");
-      coffeSteamTweaks.close();
-      coffeSteamTweaks.addColor(debug, "color").onChange(() => {
+      this.coffeeSteamTweaks = this.gui.addFolder("CoffeeSteam");
+      this.coffeeSteamTweaks.close();
+      this.coffeeSteamTweaks.addColor(debug, "color").onChange(() => {
         this.coffeeSteam!.material.uniforms.uColor.value.set(debug.color);
       });
-      coffeSteamTweaks.add(this.coffeeSteam.material, "wireframe");
+      this.coffeeSteamTweaks.add(this.coffeeSteam.material, "wireframe");
     }
 
     if (this.acidEffect) this.acidEffect.setupTweaks();
-
-    if (this.radioController) {
-      const radioDebug = {
-        volume: 70,
-      };
-      const radioTweaks = this.gui.addFolder("Radio");
-      radioTweaks.close();
-      radioTweaks
-        .add(radioDebug, "volume")
-        .min(0)
-        .max(100)
-        .onChange(() => {
-          this.radioController!.setVolume(radioDebug.volume / 100);
-        });
-    }
+    if (this.radioController) this.radioController.setupTweaks();
   }
 
   update() {
@@ -295,6 +281,9 @@ class Lab {
   }
 
   destroy() {
+    this.glassTweaks?.destroy();
+    this.coffeeSteamTweaks?.destroy();
+
     this.acidEffect?.dispose();
     this.coffeeSteam?.dispose();
     this.greenChemicalSteam?.dispose();

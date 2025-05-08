@@ -1,3 +1,16 @@
+@font-face {
+  font-family: "SourceCodePro";
+  src: url("/fonts/SourceCodePro-Medium.ttf");
+  font-size: normal;
+}
+
+:root {
+  --background: #100e1d;
+  --foreground: #f4ebf9;
+  --banner-text-color: #4f4688;
+  --link-color: #6259a2;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -7,11 +20,19 @@
 html,
 body {
   overflow: hidden;
-  background-color: #100e1d;
+  background: var(--background);
+
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  touch-action: none;
 }
 
 .lil-gui {
-  --width: min(95%, 425px);
+  --width: min(96%, 425px);
+  --background-color: #2e2850;
   --title-background-color: #211d39;
   --widget-height: 1.25rem;
   --widget-color: #211d39;
@@ -25,9 +46,135 @@ body {
 
   top: 0.3rem !important;
   right: 0.5rem !important;
-  user-select: none;
 }
 
-.lil-gui .children {
-  background: #2e2850;
+.instruction_banner {
+  z-index: 10;
+  position: fixed;
+  bottom: 1rem;
+  left: 1rem;
+  color: var(--banner-text-color);
+  font-size: 0.9rem;
+  font-family: "SourceCodePro", system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
+    sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  gap: 0.25rem;
+}
+
+.instruction_banner__link {
+  color: var(--link-color);
+  text-decoration: underline;
+}
+
+.loader_container {
+  pointer-events: none;
+  z-index: 999999;
+  background: var(--background);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-content: center;
+  gap: 0.9rem;
+}
+
+.loader_text {
+  font-family: "SourceCodePro", system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
+    sans-serif;
+  color: var(--foreground);
+  text-align: center;
+  font-size: 1.25rem;
+}
+
+.progressbar_container {
+  display: flex;
+  padding-block: 0.3rem;
+  padding-inline: 0.325rem 0.34rem;
+  border: solid 2px var(--foreground);
+  width: min(90vw, 225px);
+  height: 2.75rem;
+  border-radius: 0.6rem;
+  overflow: hidden;
+}
+
+.progressbar {
+  background-color: var(--foreground);
+  width: 100%;
+  height: 100%;
+  border-top-left-radius: 0.285rem;
+  border-bottom-left-radius: 0.285rem;
+
+  transform: scaleX(0);
+  transform-origin: top left;
+  transition: transform 0.35s ease-in-out;
+  will-change: transform opacity;
+}
+
+.loader {
+  position: relative;
+  width: 1.25rem;
+  height: 2.5rem;
+  margin-inline: auto;
+  margin-bottom: 1.25rem;
+  background: var(--foreground);
+}
+
+.loader:before,
+.loader:after {
+  content: "";
+  position: absolute;
+}
+
+.loader:before {
+  width: 0;
+  height: 0;
+  top: -25%;
+  left: 50%;
+  translate: -50%;
+  border: 2rem solid transparent;
+  border-bottom: 2.5rem solid var(--foreground);
+  border-radius: 0.5rem;
+}
+
+.loader:after {
+  top: 0;
+  left: 0.25rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  background: var(--foreground);
+  border-radius: 50%;
+  animation: loader-bubbles 1.25s linear infinite forwards;
+}
+
+@keyframes loader-bubbles {
+  0% {
+    box-shadow: 0 -1rem var(--foreground), 3px 0 var(--foreground),
+      0.35rem 0 var(--foreground);
+  }
+
+  30% {
+    box-shadow: 0.1rem -2rem rgba(239, 223, 255, 0),
+      0.35rem -1rem var(--foreground), 0.35rem 0 var(--foreground);
+  }
+
+  60% {
+    box-shadow: 0.1rem 0 rgba(239, 223, 255, 0),
+      0.35rem -2rem rgba(239, 223, 255, 0), 0.1rem -1rem var(--foreground);
+  }
+
+  61% {
+    box-shadow: 0.1rem 0 var(--foreground), 0.35rem -2rem rgba(239, 223, 255, 0),
+      0.1rem -1rem var(--foreground);
+  }
+
+  100% {
+    box-shadow: 0 -1rem var(--foreground), 0.35rem -2rem rgba(239, 223, 255, 0),
+      0.35rem -2rem rgba(239, 223, 255, 0);
+  }
 }
