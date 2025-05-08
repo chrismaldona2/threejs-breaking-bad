@@ -1,7 +1,6 @@
 import Experience from "../Experience";
 import Lab from "./Lab";
 import Environment from "./Environment";
-import InstructionBanner from "../InstructionBanner";
 
 class World {
   private readonly experience = Experience.getInstance();
@@ -12,7 +11,6 @@ class World {
     this.environment = new Environment();
 
     this.experience.resources.on("loadFinish", () => {
-      new InstructionBanner();
       this.lab = new Lab();
       this.lab.setupTweaks();
       this.experience.camera.setupTweaks();

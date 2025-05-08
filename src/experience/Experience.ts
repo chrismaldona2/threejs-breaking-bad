@@ -10,6 +10,7 @@ import Resources from "./utils/Resources";
 import World from "./world/World";
 import AudioListener from "./utils/AudioListener";
 import LoadingScreen from "./LoadingScreen";
+import InstructionBanner from "./InstructionBanner";
 
 class Experience {
   private static instance: Experience;
@@ -23,6 +24,7 @@ class Experience {
   renderer!: Renderer;
   resources!: Resources;
   loadingScreen!: LoadingScreen;
+  instructionBanner!: InstructionBanner;
   world!: World;
   listener!: AudioListener;
 
@@ -47,6 +49,9 @@ class Experience {
 
     this.sizes.on("resize", () => this.resize());
     this.timer.on("tick", () => this.update());
+    this.resources.on("loadFinish", () => {
+      this.instructionBanner = new InstructionBanner();
+    });
   }
 
   resize() {
@@ -72,7 +77,8 @@ class Experience {
 
     this.debug.dispose();
     this.canvas.destroy();
-    this.loadingScreen.destroy();
+    this.loadingScreen?.destroy();
+    this.instructionBanner?.destroy();
   }
 
   static getInstance(): Experience {
