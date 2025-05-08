@@ -3,24 +3,28 @@ import Experience from "../Experience";
 import vertexShader from "../../shaders/steam/vertex.glsl";
 import fragmentShader from "../../shaders/steam/fragment.glsl";
 
-export interface SteamOptions {
-  color?: string;
-  twistSpeed?: number;
-  twistStrength?: number;
-  windSpeed?: number;
-  windStrength?: number;
-  windExponent?: number;
-  steamUvScale?: number;
-  steamSpeed?: number;
-  steamThresholdLow?: number;
-  steamThresholdHigh?: number;
-  steamOpacity?: number;
+interface Options {
+  color: string;
+  twistSpeed: number;
+  twistStrength: number;
+  windSampleX: number;
+  windSampleZ: number;
+  windSpeed: number;
+  windStrength: number;
+  windExponent: number;
+  steamUvScale: number;
+  steamSpeed: number;
+  steamThresholdLow: number;
+  steamThresholdHigh: number;
+  steamOpacity: number;
 }
 
-const defaultOptions: SteamOptions = {
+const defaultOptions: Options = {
   color: "#d3c5e2",
   twistSpeed: 0.01,
   twistStrength: 7,
+  windSampleX: 0.25,
+  windSampleZ: 0.75,
   windSpeed: 0.01,
   windStrength: 2,
   windExponent: 4,
@@ -30,6 +34,8 @@ const defaultOptions: SteamOptions = {
   steamThresholdHigh: 1.0,
   steamOpacity: 0.5,
 };
+
+export type SteamOptions = Partial<Options>;
 
 class Steam {
   private readonly experience = Experience.getInstance();
@@ -63,6 +69,8 @@ class Steam {
         uColor: new THREE.Uniform(new THREE.Color(mergedOpts.color)),
         uTwistSpeed: new THREE.Uniform(mergedOpts.twistSpeed),
         uTwistStrength: new THREE.Uniform(mergedOpts.twistStrength),
+        uWindSampleX: new THREE.Uniform(mergedOpts.windSampleX),
+        uWindSampleZ: new THREE.Uniform(mergedOpts.windSampleZ),
         uWindSpeed: new THREE.Uniform(mergedOpts.windSpeed),
         uWindStrength: new THREE.Uniform(mergedOpts.windStrength),
         uWindExponent: new THREE.Uniform(mergedOpts.windExponent),

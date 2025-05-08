@@ -190,7 +190,7 @@ class Lab {
       steamThresholdHigh: 0.75,
       twistStrength: 7,
       windSpeed: 0.01,
-      windStrength: 17.5,
+      windStrength: 8,
       windExponent: 5,
     };
 
@@ -199,6 +199,8 @@ class Lab {
       color: "#8af4a7",
       steamThresholdHigh: 1,
       steamOpacity: 0.85,
+      windSampleX: 0.6,
+      windSampleZ: 0.1,
     });
     this.greenChemicalSteam.mesh.scale.set(0.13, 1, 0.13);
     this.greenChemicalSteam.mesh.position.set(0.834, 3.27, -4);
@@ -206,6 +208,7 @@ class Lab {
     this.blueChemicalSteam = new Steam({
       ...chemicalSteamConf,
       color: "#a8f5ff",
+      windStrength: 15,
     });
     this.blueChemicalSteam.mesh.scale.set(0.13, 1.4, 0.13);
     this.blueChemicalSteam.mesh.position.set(1.515, 3.193, -4.35);
@@ -214,12 +217,13 @@ class Lab {
       ...chemicalSteamConf,
       color: "#ffb22e",
       steamOpacity: 0.6,
-      twistStrength: 11.25,
       windStrength: 5.3,
       steamUvScale: 0.08,
       twistSpeed: 0.01,
       steamThresholdLow: 0,
       steamThresholdHigh: 1,
+      windSampleX: 0.9,
+      windSampleZ: 0.4,
     });
     this.orangeChemicalSteam.mesh.scale.set(0.13, 0.85, 0.13);
     this.orangeChemicalSteam.mesh.position.set(2.2, 3.18, -3.931);

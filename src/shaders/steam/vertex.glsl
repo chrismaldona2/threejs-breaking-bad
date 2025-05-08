@@ -5,6 +5,9 @@ uniform sampler2D uTexture;
 
 uniform float uTwistSpeed;
 uniform float uTwistStrength;
+
+uniform float uWindSampleX;
+uniform float uWindSampleZ;
 uniform float uWindSpeed;
 uniform float uWindStrength;
 uniform float uWindExponent;
@@ -20,8 +23,8 @@ void main() {
   newPosition.xz = rotate2D(newPosition.xz, angle);
 
   vec2 windOffset = vec2(
-    texture(uTexture, vec2(0.25, uTime * uWindSpeed)).r - 0.5,
-    texture(uTexture, vec2(0.75, uTime * uWindSpeed)).r - 0.5
+    texture(uTexture, vec2(uWindSampleX, uTime * uWindSpeed)).r - 0.5,
+    texture(uTexture, vec2(uWindSampleZ, uTime * uWindSpeed)).r - 0.5
   );
   windOffset *= pow(uv.y, uWindExponent) * uWindStrength;
   newPosition.xz += windOffset;
