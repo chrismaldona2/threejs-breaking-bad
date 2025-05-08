@@ -95,6 +95,7 @@ class Camera {
           this.instance === this.perspectiveCamera
             ? this.orthographicCamera
             : this.perspectiveCamera;
+        this.resize();
         this.setupBounds();
         this.initOrbitControls(this.instance);
         this.experience.listener.setupCameraListener();
