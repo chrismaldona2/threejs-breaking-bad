@@ -14,24 +14,21 @@ import InstructionBanner from "./InstructionBanner";
 
 class Experience {
   private static instance: Experience;
-  debug!: Debug;
-  sizes!: Sizes;
-  canvas!: Canvas;
-  fullscreenHandler!: FullscreenHandler;
-  scene!: THREE.Scene;
-  camera!: Camera;
-  timer!: Timer;
-  renderer!: Renderer;
-  resources!: Resources;
-  loadingScreen!: LoadingScreen;
-  instructionBanner!: InstructionBanner;
-  world!: World;
-  listener!: AudioListener;
+  debug: Debug;
+  sizes: Sizes;
+  canvas: Canvas;
+  fullscreenHandler: FullscreenHandler;
+  scene: THREE.Scene;
+  camera: Camera;
+  timer: Timer;
+  renderer: Renderer;
+  resources: Resources;
+  loadingScreen: LoadingScreen;
+  world: World;
+  listener: AudioListener;
+  instructionBanner?: InstructionBanner;
 
-  constructor() {
-    if (Experience.instance) {
-      return Experience.instance;
-    }
+  private constructor() {
     Experience.instance = this;
 
     this.debug = new Debug();
@@ -82,9 +79,7 @@ class Experience {
   }
 
   static getInstance(): Experience {
-    if (!Experience.instance) {
-      throw new Error("Experience not initialized yet");
-    }
+    if (!Experience.instance) Experience.instance = new Experience();
     return Experience.instance;
   }
 }
