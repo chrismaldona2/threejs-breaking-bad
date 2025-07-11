@@ -8,8 +8,8 @@ class Camera {
 
   private sizes = this.experience.sizes;
 
-  private boundsMin!: THREE.Vector3;
-  private boundsMax!: THREE.Vector3;
+  private minBounds!: THREE.Vector3;
+  private maxBounds!: THREE.Vector3;
 
   private perspectiveCamera!: THREE.PerspectiveCamera;
   private orthographicCamera!: THREE.OrthographicCamera;
@@ -29,11 +29,11 @@ class Camera {
 
   private setupBounds() {
     if (this.instance instanceof THREE.PerspectiveCamera) {
-      this.boundsMin = new THREE.Vector3(-0.32, 0, -0.1);
-      this.boundsMax = new THREE.Vector3(2, 5, 3);
+      this.minBounds = new THREE.Vector3(-0.32, 0, -0.1);
+      this.maxBounds = new THREE.Vector3(2, 5, 3);
     } else {
-      this.boundsMin = new THREE.Vector3(0, 0, 0.1);
-      this.boundsMax = new THREE.Vector3(2, 10, 1.75);
+      this.minBounds = new THREE.Vector3(0, 0, 0.1);
+      this.maxBounds = new THREE.Vector3(2, 10, 1.75);
     }
   }
 
@@ -87,11 +87,8 @@ class Camera {
 
     this.orbitControls.maxPolarAngle = Math.PI / 2.1;
     this.orbitControls.zoomSpeed = 0.5;
-  }
 
-  private handleBounds() {
-    this.instance.position.clamp(this.boundsMin, this.boundsMax);
-    this.orbitControls.target.clamp(this.boundsMin, this.boundsMax);
+    this.orbitControls.addEventListener("change", this.handleBoundaries);
   }
 
   setupTweaks() {
@@ -129,12 +126,19 @@ class Camera {
 
   update() {
     this.orbitControls.update();
-    this.handleBounds();
   }
 
   dispose() {
+    this.orbitControls.removeEventListener("change", this.handleBoundaries);
     this.orbitControls.dispose();
   }
+
+  private handleBoundaries = () => {
+    const allowedPosition = this.instance.position
+      .clone()
+      .clamp(this.minBounds, this.maxBounds);
+    this.instance.position.lerp(allowedPosition, 0.25);
+  };
 }
 
 export default Camera;
