@@ -29,7 +29,7 @@ class Camera {
 
   private setupBounds() {
     if (this.instance instanceof THREE.PerspectiveCamera) {
-      this.minBounds = new THREE.Vector3(-0.32, 0, -0.1);
+      this.minBounds = new THREE.Vector3(-0.25, 0, -0.1);
       this.maxBounds = new THREE.Vector3(2, 5, 3);
     } else {
       this.minBounds = new THREE.Vector3(0, 0, 0.1);

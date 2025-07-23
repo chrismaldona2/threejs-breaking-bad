@@ -81,6 +81,7 @@ body {
   display: grid;
   place-content: center;
   gap: 0.9rem;
+  padding-inline: 1rem;
 }
 
 .loader_text {
@@ -92,6 +93,11 @@ body {
   font-size: 1.25rem;
 }
 
+.disclaimer {
+  margin-top: 1rem;
+  max-width: 38ch;
+}
+
 .progressbar_container {
   display: flex;
   padding-block: 0.3rem;
@@ -101,6 +107,7 @@ body {
   height: 2.75rem;
   border-radius: 0.6rem;
   overflow: hidden;
+  margin-inline: auto;
 }
 
 .progressbar {

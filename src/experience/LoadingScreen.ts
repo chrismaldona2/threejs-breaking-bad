@@ -7,15 +7,17 @@ const CLASS_NAMES = {
   text: "loader_text",
   progressBarContainer: "progressbar_container",
   progressBar: "progressbar",
+  disclaimer: "disclaimer",
 } as const;
 
 class LoadingScreen {
   private readonly resources = Experience.getInstance().resources;
   private container: HTMLDivElement;
   private loader: HTMLDivElement;
-  private text: HTMLSpanElement;
+  private loading: HTMLSpanElement;
   private progressBarContainer: HTMLDivElement;
   private progressBar: HTMLDivElement;
+  private disclaimer: HTMLParagraphElement;
 
   constructor() {
     this.container = document.createElement("div");
@@ -24,9 +26,9 @@ class LoadingScreen {
     this.loader = document.createElement("div");
     this.loader.classList.add(CLASS_NAMES.loader);
 
-    this.text = document.createElement("span");
-    this.text.classList.add(CLASS_NAMES.text);
-    this.text.innerText = "Loading";
+    this.loading = document.createElement("span");
+    this.loading.classList.add(CLASS_NAMES.text);
+    this.loading.innerText = "Loading";
 
     this.progressBarContainer = document.createElement("div");
     this.progressBarContainer.classList.add("progressbar_container");
@@ -35,17 +37,27 @@ class LoadingScreen {
     this.progressBar = document.createElement("div");
     this.progressBar.classList.add(CLASS_NAMES.progressBar);
 
+    this.disclaimer = document.createElement("p");
+    this.disclaimer.classList.add(CLASS_NAMES.text, CLASS_NAMES.disclaimer);
+    this.disclaimer.innerText =
+      "Non-commercial educational project. Not affiliated with any IP";
+
     /* MOUNT */
     this.progressBarContainer.appendChild(this.progressBar);
-    this.container.append(this.loader, this.text, this.progressBarContainer);
+    this.container.append(
+      this.loader,
+      this.loading,
+      this.progressBarContainer,
+      this.disclaimer
+    );
     document.body.appendChild(this.container);
 
     /* ARIA */
     this.progressBarContainer.setAttribute("role", "progressbar");
     this.progressBarContainer.setAttribute("aria-valuemin", "0");
     this.progressBarContainer.setAttribute("aria-valuemax", "100");
-    this.text.setAttribute("role", "status");
-    this.text.setAttribute("aria-live", "polite");
+    this.loading.setAttribute("role", "status");
+    this.loading.setAttribute("aria-live", "polite");
 
     /* EVENTS */
     this.resources.on("fileLoaded", () => this.updateProgress());
