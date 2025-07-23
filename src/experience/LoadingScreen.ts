@@ -40,7 +40,7 @@ class LoadingScreen {
     this.disclaimer = document.createElement("p");
     this.disclaimer.classList.add(CLASS_NAMES.text, CLASS_NAMES.disclaimer);
     this.disclaimer.innerText =
-      "Non-commercial educational project. Not affiliated with any IP";
+      "Non-commercial educational project. Not affiliated with any IP.";
 
     /* MOUNT */
     this.progressBarContainer.appendChild(this.progressBar);
